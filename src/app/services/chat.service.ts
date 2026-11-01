@@ -58,7 +58,7 @@ export class ChatService {
   getUsers(): Observable<ChatUser[]> {
     // El interceptor HTTP añade el access token a esta petición protegida.
     return this.http
-      .get<ChatUsersResponse>(`${environment.apiUrl}/users`)
+      .get<ChatUsersResponse>(`${environment.apiUrl}/users`, { params: { limit: 100 } })
       .pipe(map((response) => response.users));
   }
 
