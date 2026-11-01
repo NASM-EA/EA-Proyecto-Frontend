@@ -34,4 +34,14 @@ export class UserService {
   updateUser(id: string, payload: UserInput): Observable<UserResponse> {
     return this.http.put<UserResponse>(`${this.baseUrl}/${id}`, payload);
   }
+
+  /** DELETE /users/:id (solo ADMIN). Borrado lógico: la API solo marca isDeleted */
+  softDeleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /** DELETE /users/:id/hard (solo ADMIN). Borrado definitivo de la base de datos */
+  hardDeleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/hard`);
+  }
 }

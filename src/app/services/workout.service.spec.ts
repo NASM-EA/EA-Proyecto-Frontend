@@ -37,6 +37,20 @@ describe('WorkoutService', () => {
     req.flush({ workout: {} });
   });
 
+  it('softDeleteWorkout() sends DELETE to the id url', () => {
+    service.softDeleteWorkout('w1').subscribe();
+    const req = httpMock.expectOne(`${url}/w1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('hardDeleteWorkout() sends DELETE to the /hard url', () => {
+    service.hardDeleteWorkout('w1').subscribe();
+    const req = httpMock.expectOne(`${url}/w1/hard`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
   it('updateWorkout() puts the payload to the id url', () => {
     service.updateWorkout('w1', { name: 'X', dayOfWeek: 'FRIDAY' }).subscribe();
     const req = httpMock.expectOne(`${url}/w1`);

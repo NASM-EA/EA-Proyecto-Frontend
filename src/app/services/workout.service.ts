@@ -34,4 +34,14 @@ export class WorkoutService {
   updateWorkout(id: string, payload: WorkoutInput): Observable<WorkoutResponse> {
     return this.http.put<WorkoutResponse>(`${this.baseUrl}/${id}`, payload);
   }
+
+  /** DELETE /workouts/:id. Borrado lógico: la API solo marca isDeleted */
+  softDeleteWorkout(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /** DELETE /workouts/:id/hard. Borrado definitivo de la base de datos (solo ADMIN) */
+  hardDeleteWorkout(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/hard`);
+  }
 }

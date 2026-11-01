@@ -37,6 +37,20 @@ describe('UserService', () => {
     req.flush({ user: {} });
   });
 
+  it('softDeleteUser() sends DELETE to the id url', () => {
+    service.softDeleteUser('u1').subscribe();
+    const req = httpMock.expectOne(`${url}/u1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('hardDeleteUser() sends DELETE to the /hard url', () => {
+    service.hardDeleteUser('u1').subscribe();
+    const req = httpMock.expectOne(`${url}/u1/hard`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
   it('updateUser() puts without password when it is not sent', () => {
     service.updateUser('u1', { name: 'Ana', email: 'ana@example.com', role: 'USER' }).subscribe();
     const req = httpMock.expectOne(`${url}/u1`);
