@@ -15,12 +15,10 @@ export class BookService {
   private baseUrl = `${environment.apiUrl}/books`;
 
   /** GET /books */
-  getBooks(page = 1, limit = 5, search = '', sort = '', order = 'asc'): Observable<BooksPage> {
+  getBooks(page = 1, limit = 5, search = ''): Observable<BooksPage> {
     const params = new HttpParams().set('page', page).set('limit', limit);
     const searchParams = search.trim() ? params.set('search', search.trim()) : params;
-    // Si hay una columna para ordenar, mandamos también el sentido (asc o desc)
-    const sortParams = sort ? searchParams.set('sort', sort).set('order', order) : searchParams;
-    return this.http.get<BooksPage>(this.baseUrl, { params: sortParams });
+    return this.http.get<BooksPage>(this.baseUrl, { params: searchParams });
   }
 
   /** GET /books/:id */

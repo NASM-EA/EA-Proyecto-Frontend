@@ -26,7 +26,7 @@ const PAGE_SIZE = 4;
 })
 export class BooksList implements OnInit {
   private bookService = inject(BookService);
-  private pageRequests = new Subject<{ page: number; search: string; sort: string; order: string }>();
+  private pageRequests = new Subject<{ page: number; search: string }>();
 
   books = signal<Book[]>([]);
   total = signal(0);
@@ -57,15 +57,55 @@ export class BooksList implements OnInit {
       ? `¿Borrar el libro "${book.title}"?`
       : '';
   });
-  pageBooks = computed(() => this.books());
+  // Libros de la página, ordenados en el navegador (provisional: solo afecta a la página visible)
+  pageBooks = computed(() => {
+    const field = this.sortField();
+    // Sin columna elegida se deja el orden que manda la API
+    if (!field) {
+      return this.books();
+    }
+    // Copiamos el array para no cambiar el original
+    const sortedBooks = [...this.books()];
+    sortedBooks.sort((bookA, bookB) => {
+      const valueA = this.getBookValue(bookA, field);
+      const valueB = this.getBookValue(bookB, field);
+      let result = 0;
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        result = valueA - valueB;
+      } else {
+        result = String(valueA).localeCompare(String(valueB));
+      }
+      // Si el orden es descendente damos la vuelta al resultado
+      return this.sortOrder() === 'asc' ? result : -result;
+    });
+    return sortedBooks;
+  });
+
+  // Devuelve el valor de un libro en la columna indicada, para poder compararlo al ordenar
+  getBookValue(book: Book, field: string): string | number {
+    if (field === 'title') {
+      return book.title;
+    }
+    if (field === 'authors') {
+      // Se ordena por el nombre del primer autor (si no tiene autores, texto vacío)
+      return book.authors.length > 0 ? book.authors[0].name : '';
+    }
+    if (field === 'language') {
+      return book.language ?? '';
+    }
+    if (field === 'publishedYear') {
+      return book.publishedYear ?? 0;
+    }
+    return book.price ?? 0;
+  }
 
   constructor() {
     this.pageRequests
       .pipe(
-        switchMap(({ page, search, sort, order }) => {
+        switchMap(({ page, search }) => {
           this.loading.set(true);
           this.error.set('');
-          return this.bookService.getBooks(page, PAGE_SIZE, search, sort, order).pipe(
+          return this.bookService.getBooks(page, PAGE_SIZE, search).pipe(
             tap((response) => {
               this.books.set(response.books);
               this.total.set(response.total);
@@ -90,16 +130,12 @@ export class BooksList implements OnInit {
 
   loadPage(page: number): void {
     this.page.set(page);
-    this.pageRequests.next({
-      page,
-      search: this.search().trim(),
-      sort: this.sortField(),
-      order: this.sortOrder(),
-    });
+    this.pageRequests.next({ page, search: this.search().trim() });
   }
 
   // Ordena por la columna pulsada: la primera vez ascendente, si se vuelve a pulsar descendente.
-  // Si se pulsa otra columna, empieza otra vez en ascendente. Siempre vuelve a la página 1.
+  // Si se pulsa otra columna, empieza otra vez en ascendente.
+  // Solo cambia las señales: la lista de la página se reordena sola en el navegador.
   sortBy(field: string): void {
     if (this.sortField() === field && this.sortOrder() === 'asc') {
       this.sortOrder.set('desc');
@@ -107,7 +143,6 @@ export class BooksList implements OnInit {
       this.sortField.set(field);
       this.sortOrder.set('asc');
     }
-    this.loadPage(1);
   }
 
   // Devuelve la flecha (▲ / ▼) de la columna que está ordenando y nada en las demás

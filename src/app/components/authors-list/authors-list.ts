@@ -26,7 +26,7 @@ const PAGE_SIZE = 4;
 export class AuthorsList implements OnInit {
   private authorService = inject(AuthorService);
   private router = inject(Router);
-  private pageRequests = new Subject<{ page: number; search: string; sort: string; order: string }>();
+  private pageRequests = new Subject<{ page: number; search: string }>();
 
   // Antes: authors: Author[] = [];
   authors = signal<Author[]>([]);
@@ -56,15 +56,51 @@ export class AuthorsList implements OnInit {
       : '';
   });
 
-  pageAuthors = computed(() => this.authors());
+  // Autores de la página, ordenados en el navegador (provisional: solo afecta a la página visible)
+  pageAuthors = computed(() => {
+    const field = this.sortField();
+    // Sin columna elegida se deja el orden que manda la API
+    if (!field) {
+      return this.authors();
+    }
+    // Copiamos el array para no cambiar el original
+    const sortedAuthors = [...this.authors()];
+    sortedAuthors.sort((authorA, authorB) => {
+      const valueA = this.getAuthorValue(authorA, field);
+      const valueB = this.getAuthorValue(authorB, field);
+      // Todos los valores son texto (la fecha YYYY-MM-DD también se ordena bien como texto)
+      const result = valueA.localeCompare(valueB);
+      // Si el orden es descendente damos la vuelta al resultado
+      return this.sortOrder() === 'asc' ? result : -result;
+    });
+    return sortedAuthors;
+  });
+
+  // Devuelve el valor de un autor en la columna indicada, para poder compararlo al ordenar
+  getAuthorValue(author: Author, field: string): string {
+    if (field === 'name') {
+      return author.name;
+    }
+    if (field === 'email') {
+      return author.email;
+    }
+    if (field === 'nationality') {
+      return author.nationality ?? '';
+    }
+    if (field === 'birthDate') {
+      return author.birthDate ?? '';
+    }
+    // Estado: activos antes que inactivos al ir ascendente
+    return author.active ? 'a' : 'b';
+  }
 
   constructor() {
     this.pageRequests
       .pipe(
-        switchMap(({ page, search, sort, order }) => {
+        switchMap(({ page, search }) => {
           this.loading.set(true);
           this.error.set('');
-          return this.authorService.getAuthors(page, PAGE_SIZE, search, sort, order).pipe(
+          return this.authorService.getAuthors(page, PAGE_SIZE, search).pipe(
             tap((response) => {
               this.authors.set(response.authors);
               this.total.set(response.total);
@@ -89,16 +125,12 @@ export class AuthorsList implements OnInit {
 
   loadPage(page: number): void {
     this.page.set(page);
-    this.pageRequests.next({
-      page,
-      search: this.search().trim(),
-      sort: this.sortField(),
-      order: this.sortOrder(),
-    });
+    this.pageRequests.next({ page, search: this.search().trim() });
   }
 
   // Ordena por la columna pulsada: la primera vez ascendente, si se vuelve a pulsar descendente.
-  // Si se pulsa otra columna, empieza otra vez en ascendente. Siempre vuelve a la página 1.
+  // Si se pulsa otra columna, empieza otra vez en ascendente.
+  // Solo cambia las señales: la lista de la página se reordena sola en el navegador.
   sortBy(field: string): void {
     if (this.sortField() === field && this.sortOrder() === 'asc') {
       this.sortOrder.set('desc');
@@ -106,7 +138,6 @@ export class AuthorsList implements OnInit {
       this.sortField.set(field);
       this.sortOrder.set('asc');
     }
-    this.loadPage(1);
   }
 
   // Devuelve la flecha (▲ / ▼) de la columna que está ordenando y nada en las demás
