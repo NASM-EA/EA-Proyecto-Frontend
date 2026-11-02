@@ -1,0 +1,53 @@
+<h1>{{ id() ? 'Editar ejercicio' : 'Nuevo ejercicio' }}</h1>
+
+@if (error()) {
+  <p class="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Cargando...</p>
+} @else if (loadFailed()) {
+  <a routerLink="/exercises">Volver a la lista de ejercicios</a>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Nombre *
+      <input type="text" formControlName="name" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="field-error">El nombre es obligatorio</small>
+      }
+    </label>
+
+    <label>
+      Categoría *
+      <select formControlName="category">
+        @for (item of categories; track item) {
+          <option [value]="item">{{ categoryLabels[item] }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Series
+      <input type="number" formControlName="sets" min="0" step="1" />
+      @if (form.controls.sets.touched && form.controls.sets.invalid) {
+        <small class="field-error">Tiene que ser un número entero, 0 o mayor</small>
+      }
+    </label>
+
+    <label>
+      Repeticiones
+      <input type="number" formControlName="reps" min="0" step="1" />
+      @if (form.controls.reps.touched && form.controls.reps.invalid) {
+        <small class="field-error">Tiene que ser un número entero, 0 o mayor</small>
+      }
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <a routerLink="/exercises">Cancelar</a>
+    </div>
+  </form>
+}

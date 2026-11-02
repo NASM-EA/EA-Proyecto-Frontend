@@ -1,0 +1,54 @@
+<h1>{{ id() ? 'Editar rutina' : 'Nueva rutina' }}</h1>
+
+@if (error()) {
+  <p class="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Cargando...</p>
+} @else if (loadFailed()) {
+  <a routerLink="/workouts">Volver a la lista de rutinas</a>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Nombre *
+      <input type="text" formControlName="name" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="field-error">El nombre es obligatorio</small>
+      }
+    </label>
+
+    <label>
+      Día de la semana *
+      <select formControlName="dayOfWeek">
+        @for (day of days; track day) {
+          <option [value]="day">{{ dayLabels[day] }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Descripción
+      <textarea formControlName="description" rows="3"></textarea>
+    </label>
+
+    <label>
+      Ejercicios
+      <select multiple formControlName="exercises">
+        @for (exercise of exercises(); track exercise._id) {
+          <option [value]="exercise._id">
+            {{ exercise.name }} ({{ categoryLabels[exercise.category] }})
+          </option>
+        }
+      </select>
+      <small class="hint">Ctrl + clic para elegir varios</small>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <a routerLink="/workouts">Cancelar</a>
+    </div>
+  </form>
+}
