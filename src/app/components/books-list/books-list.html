@@ -27,12 +27,17 @@
       <thead>
         <tr>
           <th></th>
-          <th>Título</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('title')">Título {{ sortArrow('title') }}</th>
           <th>Descripción</th>
-          <th>Autores</th>
-          <th>Idioma</th>
-          <th>Año</th>
-          <th>Precio</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('authors')">Autores {{ sortArrow('authors') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('language')">Idioma {{ sortArrow('language') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('publishedYear')">Año {{ sortArrow('publishedYear') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('price')">Precio {{ sortArrow('price') }}</th>
           <th>Tags</th>
           <th></th>
         </tr>

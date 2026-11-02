@@ -26,7 +26,7 @@ const PAGE_SIZE = 4;
 })
 export class BooksList implements OnInit {
   private bookService = inject(BookService);
-  private pageRequests = new Subject<{ page: number; search: string }>();
+  private pageRequests = new Subject<{ page: number; search: string; sort: string; order: string }>();
 
   books = signal<Book[]>([]);
   total = signal(0);
@@ -36,6 +36,10 @@ export class BooksList implements OnInit {
 
   search = signal('');
   page = signal(1);
+
+  // Columna por la que se ordena (vacío = sin ordenar) y sentido: 'asc' o 'desc'
+  sortField = signal('');
+  sortOrder = signal('asc');
 
   // Igual que en autores: tabla o tarjetas, y lo guardo en el navegador
   viewMode = signal<ViewMode>(savedViewMode('books-view'));
@@ -58,10 +62,10 @@ export class BooksList implements OnInit {
   constructor() {
     this.pageRequests
       .pipe(
-        switchMap(({ page, search }) => {
+        switchMap(({ page, search, sort, order }) => {
           this.loading.set(true);
           this.error.set('');
-          return this.bookService.getBooks(page, PAGE_SIZE, search).pipe(
+          return this.bookService.getBooks(page, PAGE_SIZE, search, sort, order).pipe(
             tap((response) => {
               this.books.set(response.books);
               this.total.set(response.total);
@@ -86,7 +90,32 @@ export class BooksList implements OnInit {
 
   loadPage(page: number): void {
     this.page.set(page);
-    this.pageRequests.next({ page, search: this.search().trim() });
+    this.pageRequests.next({
+      page,
+      search: this.search().trim(),
+      sort: this.sortField(),
+      order: this.sortOrder(),
+    });
+  }
+
+  // Ordena por la columna pulsada: la primera vez ascendente, si se vuelve a pulsar descendente.
+  // Si se pulsa otra columna, empieza otra vez en ascendente. Siempre vuelve a la página 1.
+  sortBy(field: string): void {
+    if (this.sortField() === field && this.sortOrder() === 'asc') {
+      this.sortOrder.set('desc');
+    } else {
+      this.sortField.set(field);
+      this.sortOrder.set('asc');
+    }
+    this.loadPage(1);
+  }
+
+  // Devuelve la flecha (▲ / ▼) de la columna que está ordenando y nada en las demás
+  sortArrow(field: string): string {
+    if (this.sortField() !== field) {
+      return '';
+    }
+    return this.sortOrder() === 'asc' ? '▲' : '▼';
   }
 
   confirmDelete(): void {

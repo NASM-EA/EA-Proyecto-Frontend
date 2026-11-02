@@ -27,11 +27,16 @@
     <table>
       <thead>
         <tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Nacionalidad</th>
-          <th>Nacimiento</th>
-          <th>Estado</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('name')">Nombre {{ sortArrow('name') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('email')">Email {{ sortArrow('email') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('nationality')">Nacionalidad {{ sortArrow('nationality') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('birthDate')">Nacimiento {{ sortArrow('birthDate') }}</th>
+          <!-- Cabecera pulsable para ordenar -->
+          <th class="sortable" (click)="sortBy('active')">Estado {{ sortArrow('active') }}</th>
           <th></th>
         </tr>
       </thead>

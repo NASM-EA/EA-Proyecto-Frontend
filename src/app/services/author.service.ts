@@ -15,10 +15,12 @@ export class AuthorService {
   private baseUrl = `${environment.apiUrl}/authors`;
 
   /** GET /authors */
-  getAuthors(page = 1, limit = 5, search = ''): Observable<AuthorsPage> {
+  getAuthors(page = 1, limit = 5, search = '', sort = '', order = 'asc'): Observable<AuthorsPage> {
     const params = new HttpParams().set('page', page).set('limit', limit);
     const searchParams = search.trim() ? params.set('search', search.trim()) : params;
-    return this.http.get<AuthorsPage>(this.baseUrl, { params: searchParams });
+    // Si hay una columna para ordenar, mandamos también el sentido (asc o desc)
+    const sortParams = sort ? searchParams.set('sort', sort).set('order', order) : searchParams;
+    return this.http.get<AuthorsPage>(this.baseUrl, { params: sortParams });
   }
 
   /** GET /authors/:id */

@@ -116,6 +116,12 @@ th {
   font-weight: 600;
 }
 
+/* Cabeceras que se pueden pulsar para ordenar */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
 td.actions {
   text-align: right;
   white-space: nowrap;

@@ -26,7 +26,7 @@ const PAGE_SIZE = 4;
 export class AuthorsList implements OnInit {
   private authorService = inject(AuthorService);
   private router = inject(Router);
-  private pageRequests = new Subject<{ page: number; search: string }>();
+  private pageRequests = new Subject<{ page: number; search: string; sort: string; order: string }>();
 
   // Antes: authors: Author[] = [];
   authors = signal<Author[]>([]);
@@ -38,6 +38,10 @@ export class AuthorsList implements OnInit {
   // Texto del buscador (va con [(ngModel)]) y página en la que estoy
   search = signal('');
   page = signal(1);
+
+  // Columna por la que se ordena (vacío = sin ordenar) y sentido: 'asc' o 'desc'
+  sortField = signal('');
+  sortOrder = signal('asc');
 
   // Tabla o tarjetas. Cada vez que cambia lo guardo, así al volver sigue igual
   viewMode = signal<ViewMode>(savedViewMode('authors-view'));
@@ -57,10 +61,10 @@ export class AuthorsList implements OnInit {
   constructor() {
     this.pageRequests
       .pipe(
-        switchMap(({ page, search }) => {
+        switchMap(({ page, search, sort, order }) => {
           this.loading.set(true);
           this.error.set('');
-          return this.authorService.getAuthors(page, PAGE_SIZE, search).pipe(
+          return this.authorService.getAuthors(page, PAGE_SIZE, search, sort, order).pipe(
             tap((response) => {
               this.authors.set(response.authors);
               this.total.set(response.total);
@@ -85,7 +89,32 @@ export class AuthorsList implements OnInit {
 
   loadPage(page: number): void {
     this.page.set(page);
-    this.pageRequests.next({ page, search: this.search().trim() });
+    this.pageRequests.next({
+      page,
+      search: this.search().trim(),
+      sort: this.sortField(),
+      order: this.sortOrder(),
+    });
+  }
+
+  // Ordena por la columna pulsada: la primera vez ascendente, si se vuelve a pulsar descendente.
+  // Si se pulsa otra columna, empieza otra vez en ascendente. Siempre vuelve a la página 1.
+  sortBy(field: string): void {
+    if (this.sortField() === field && this.sortOrder() === 'asc') {
+      this.sortOrder.set('desc');
+    } else {
+      this.sortField.set(field);
+      this.sortOrder.set('asc');
+    }
+    this.loadPage(1);
+  }
+
+  // Devuelve la flecha (▲ / ▼) de la columna que está ordenando y nada en las demás
+  sortArrow(field: string): string {
+    if (this.sortField() !== field) {
+      return '';
+    }
+    return this.sortOrder() === 'asc' ? '▲' : '▼';
   }
 
   edit(author: Author): void {
