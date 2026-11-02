@@ -40,6 +40,7 @@
             <button type="button" class="secondary" [routerLink]="['/users', user._id, 'edit']">
               Editar
             </button>
+            <button type="button" class="danger" (click)="askDelete(user)">Borrar</button>
           </td>
         </tr>
       } @empty {
@@ -57,4 +58,14 @@
   </table>
 
   <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
+
+  <app-delete-modal
+    [open]="!!userToDelete()"
+    [itemName]="userToDelete()?.name ?? ''"
+    [hardNote]="hardNote"
+    [busy]="deleting()"
+    (softDelete)="softDelete()"
+    (hardDelete)="hardDelete()"
+    (cancelled)="cancelDelete()"
+  />
 }

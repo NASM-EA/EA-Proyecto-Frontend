@@ -48,6 +48,7 @@
             <button type="button" class="secondary" [routerLink]="['/exercises', exercise._id, 'edit']">
               Editar
             </button>
+            <button type="button" class="danger" (click)="askDelete(exercise)">Borrar</button>
           </td>
         </tr>
       } @empty {
@@ -65,4 +66,14 @@
   </table>
 
   <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
+
+  <app-delete-modal
+    [open]="!!exerciseToDelete()"
+    [itemName]="exerciseToDelete()?.name ?? ''"
+    [hardNote]="hardNote"
+    [busy]="deleting()"
+    (softDelete)="softDelete()"
+    (hardDelete)="hardDelete()"
+    (cancelled)="cancelDelete()"
+  />
 }
