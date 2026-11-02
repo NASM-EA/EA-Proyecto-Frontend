@@ -9,10 +9,11 @@ import { AuthorService } from '../../services/author.service';
 import { BookService } from '../../services/book.service';
 import { apiErrorMessage } from '../../utils/api-error';
 import { removeEmpty } from '../../utils/remove-empty';
+import { ConfirmModal } from '../confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-book-form',
-  imports: [ReactiveFormsModule, RouterLink, LanguageNamePipe],
+  imports: [ReactiveFormsModule, RouterLink, ConfirmModal, LanguageNamePipe],
   templateUrl: './book-form.html',
   styleUrl: './book-form.css',
 })
@@ -33,6 +34,8 @@ export class BookForm implements OnInit {
   loading = signal(false);
   loadFailed = signal(false);
   saving = signal(false);
+  // Controla si se muestra el modal de "¿Seguro que quieres guardar?"
+  confirmSave = signal(false);
   error = signal('');
 
   form = this.fb.group({
@@ -81,6 +84,19 @@ export class BookForm implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+
+    // Antes de guardar se pide confirmación: solo se abre el modal
+    this.confirmSave.set(true);
+  }
+
+  // Si el usuario cancela, se cierra el modal y el formulario se queda como está
+  cancelSave(): void {
+    this.confirmSave.set(false);
+  }
+
+  // Si el usuario acepta, se cierra el modal y se guarda como antes
+  doSave(): void {
+    this.confirmSave.set(false);
 
     const id = this.id();
     const book = removeEmpty(this.form.getRawValue()) as CreateBook;

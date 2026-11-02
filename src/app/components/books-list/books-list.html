@@ -156,9 +156,10 @@
     (pageChange)="loadPage($event)"
   />
 
+  <!-- Modal de confirmación antes de eliminar (el título es la pregunta de confirmación) -->
   <app-confirm-modal
     [open]="!!bookToDelete()"
-    title="Confirmar borrado"
+    title="¿Seguro que quieres eliminar?"
     [message]="deleteMessage()"
     confirmText="Borrar"
     (confirmed)="confirmDelete()"

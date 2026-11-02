@@ -59,4 +59,13 @@
       <a routerLink="/authors">Cancelar</a>
     </div>
   </form>
+
+  <!-- Modal de confirmación antes de guardar -->
+  <app-confirm-modal
+    [open]="confirmSave()"
+    title="¿Seguro que quieres guardar?"
+    confirmText="Guardar"
+    (confirmed)="doSave()"
+    (cancelled)="cancelSave()"
+  />
 }
