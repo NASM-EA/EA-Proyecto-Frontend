@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
+import { BulkDeleteResponse } from '../models/page.model';
 import { Exercise, ExerciseInput, ExerciseListParams, ExercisesPage } from '../models';
 import { buildListParams } from '../utils/list-params';
 
@@ -43,5 +44,15 @@ export class ExerciseService {
   /** DELETE /exercises/:id/hard. Borrado definitivo de la base de datos (solo ADMIN) */
   hardDeleteExercise(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/hard`);
+  }
+
+  /** DELETE /exercises con { ids }. Borrado lógico de varios a la vez (solo ADMIN) */
+  softDeleteManyExercises(ids: string[]): Observable<BulkDeleteResponse> {
+    return this.http.delete<BulkDeleteResponse>(this.baseUrl, { body: { ids } });
+  }
+
+  /** DELETE /exercises/hard con { ids }. Borrado definitivo de varios a la vez (solo ADMIN) */
+  hardDeleteManyExercises(ids: string[]): Observable<BulkDeleteResponse> {
+    return this.http.delete<BulkDeleteResponse>(`${this.baseUrl}/hard`, { body: { ids } });
   }
 }

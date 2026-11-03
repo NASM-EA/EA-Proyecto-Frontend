@@ -13,6 +13,8 @@ export class DeleteModal {
   open = input<boolean>(false);
   // Nombre de lo que se va a borrar (ejercicio, rutina o usuario)
   itemName = input<string>('');
+  // Cuántos elementos se borran: con más de uno el título habla del grupo, no de un nombre
+  count = input<number>(1);
   // Aviso extra que depende de la entidad (por ejemplo, que un ejercicio sale de sus rutinas)
   hardNote = input<string>('');
   // Si ya está borrado lógicamente, no se ofrece borrarlo lógicamente otra vez

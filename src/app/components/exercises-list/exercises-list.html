@@ -18,6 +18,11 @@
       <option [value]="item">{{ categoryLabels[item] }}</option>
     }
   </select>
+  @if (selectedCount() > 0) {
+    <button type="button" class="danger" (click)="askBulkDelete()">
+      Borrar seleccionados ({{ selectedCount() }})
+    </button>
+  }
 </div>
 
 @if (error()) {
@@ -30,6 +35,14 @@
   <table>
     <thead>
       <tr>
+        <th>
+          <input
+            type="checkbox"
+            aria-label="Seleccionar todos"
+            [checked]="allSelected()"
+            (change)="toggleAll()"
+          />
+        </th>
         <th><button type="button" class="link" (click)="sortBy('name')">Nombre {{ arrow('name') }}</button></th>
         <th><button type="button" class="link" (click)="sortBy('category')">Categoría {{ arrow('category') }}</button></th>
         <th><button type="button" class="link" (click)="sortBy('sets')">Series {{ arrow('sets') }}</button></th>
@@ -40,6 +53,14 @@
     <tbody>
       @for (exercise of exercises(); track exercise._id) {
         <tr [class.deleted]="exercise.isDeleted">
+          <td>
+            <input
+              type="checkbox"
+              [attr.aria-label]="'Seleccionar ' + exercise.name"
+              [checked]="selected().has(exercise._id)"
+              (change)="toggleSelect(exercise._id)"
+            />
+          </td>
           <td>
             {{ exercise.name }}
             @if (exercise.isDeleted) {
@@ -60,7 +81,7 @@
         </tr>
       } @empty {
         <tr>
-          <td class="empty" colspan="5">
+          <td class="empty" colspan="6">
             @if (search() || category()) {
               No hay ejercicios con esos filtros
             } @else {
@@ -75,10 +96,11 @@
   <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
 
   <app-delete-modal
-    [open]="!!exerciseToDelete()"
-    [itemName]="exerciseToDelete()?.name ?? ''"
+    [open]="!!exerciseToDelete() || bulkOpen()"
+    [itemName]="modalName()"
     [hardNote]="hardNote"
-    [allowSoft]="!exerciseToDelete()?.isDeleted"
+    [allowSoft]="modalAllowSoft()"
+    [count]="modalCount()"
     [busy]="deleting()"
     (softDelete)="softDelete()"
     (hardDelete)="hardDelete()"

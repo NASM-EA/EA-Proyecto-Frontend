@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
+import { BulkDeleteResponse } from '../models/page.model';
 import { User, UserInput, UserListParams, UsersPage } from '../models';
 import { buildListParams } from '../utils/list-params';
 
@@ -43,5 +44,15 @@ export class UserService {
   /** DELETE /users/:id/hard (solo ADMIN). Borrado definitivo de la base de datos */
   hardDeleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/hard`);
+  }
+
+  /** DELETE /users con { ids }. Borrado lógico de varios a la vez (solo ADMIN) */
+  softDeleteManyUsers(ids: string[]): Observable<BulkDeleteResponse> {
+    return this.http.delete<BulkDeleteResponse>(this.baseUrl, { body: { ids } });
+  }
+
+  /** DELETE /users/hard con { ids }. Borrado definitivo de varios a la vez (solo ADMIN) */
+  hardDeleteManyUsers(ids: string[]): Observable<BulkDeleteResponse> {
+    return this.http.delete<BulkDeleteResponse>(`${this.baseUrl}/hard`, { body: { ids } });
   }
 }

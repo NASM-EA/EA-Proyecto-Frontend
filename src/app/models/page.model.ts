@@ -18,3 +18,8 @@ export interface ListParams {
   sort?: string;
   order?: SortOrder;
 }
+
+// Respuesta del borrado múltiple: cuántos elementos se han borrado de verdad
+export interface BulkDeleteResponse {
+  deleted: number;
+}

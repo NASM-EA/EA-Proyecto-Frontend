@@ -12,10 +12,11 @@ import {
 } from '../../models';
 import { ExerciseService } from '../../services/exercise.service';
 import { apiErrorMessage } from '../../utils/api-error';
+import { ConfirmModal } from '../confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-exercise-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, ConfirmModal],
   templateUrl: './exercise-form.html',
   styles: `
     :host {
@@ -38,6 +39,8 @@ export class ExerciseForm implements OnInit {
   loading = signal(false);
   loadFailed = signal(false);
   saving = signal(false);
+  // Aviso de confirmación que se enseña antes de enviar el formulario
+  confirmOpen = signal(false);
   error = signal('');
 
   form = this.fb.group({
@@ -72,6 +75,17 @@ export class ExerciseForm implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+
+    // No se guarda hasta que el usuario confirma en el aviso
+    this.confirmOpen.set(true);
+  }
+
+  cancelSave(): void {
+    this.confirmOpen.set(false);
+  }
+
+  confirmSave(): void {
+    this.confirmOpen.set(false);
 
     const id = this.id();
     // La API reemplaza el ejercicio entero al editar, así que se envían todos los campos
