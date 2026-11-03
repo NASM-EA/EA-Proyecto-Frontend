@@ -39,6 +39,8 @@ export interface Workout {
   dayOfWeek: DayOfWeek;
   description?: string;
   exercises: Exercise[];
+  isDeleted?: boolean;
+  deletedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

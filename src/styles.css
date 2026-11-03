@@ -293,3 +293,9 @@ button.link {
   color: var(--muted);
   font-size: 0.75rem;
 }
+
+/* Filas de elementos borrados lógicamente (solo las ve un ADMIN) */
+tr.deleted td {
+  color: var(--muted);
+  background: #f6f6f8;
+}

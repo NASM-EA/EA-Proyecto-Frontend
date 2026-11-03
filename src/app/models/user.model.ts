@@ -10,6 +10,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -18,6 +19,8 @@ export interface User {
 export interface UserSummary {
   _id: string;
   name: string;
+  // Solo lo manda la API a los ADMIN (GET /users)
+  isDeleted?: boolean;
 }
 
 export interface UsersPage {

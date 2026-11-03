@@ -18,15 +18,17 @@
       <h2 id="delete-modal-title">Borrar "{{ itemName() }}"</h2>
       <p class="muted">Elige cómo quieres borrarlo:</p>
 
-      <div class="option">
-        <div>
-          <strong>Borrar</strong>
-          <p>Se oculta de los listados pero sigue en la base de datos (borrado lógico).</p>
+      @if (allowSoft()) {
+        <div class="option">
+          <div>
+            <strong>Borrar</strong>
+            <p>Se oculta de los listados pero sigue en la base de datos (borrado lógico).</p>
+          </div>
+          <button type="button" class="secondary" [disabled]="busy()" (click)="softDelete.emit()">
+            Borrar
+          </button>
         </div>
-        <button type="button" class="secondary" [disabled]="busy()" (click)="softDelete.emit()">
-          Borrar
-        </button>
-      </div>
+      }
 
       <div class="option">
         <div>
