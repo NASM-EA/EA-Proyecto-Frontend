@@ -1,0 +1,60 @@
+<h1>{{ id() ? 'Editar usuario' : 'Nuevo usuario' }}</h1>
+
+@if (error()) {
+  <p class="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Cargando...</p>
+} @else if (loadFailed()) {
+  <a routerLink="/users">Volver a la lista de usuarios</a>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Nombre *
+      <input type="text" formControlName="name" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="field-error">El nombre es obligatorio</small>
+      }
+    </label>
+
+    <label>
+      Email *
+      <input type="email" formControlName="email" />
+      @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+        <small class="field-error">El email es obligatorio</small>
+      } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+        <small class="field-error">El email no tiene un formato válido</small>
+      }
+    </label>
+
+    <label>
+      Contraseña {{ id() ? '' : '*' }}
+      <input type="password" formControlName="password" autocomplete="new-password" />
+      @if (id()) {
+        <small class="hint">Déjala vacía para mantener la actual</small>
+      }
+      @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+        <small class="field-error">La contraseña es obligatoria</small>
+      } @else if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+        <small class="field-error">Tiene que tener al menos 8 caracteres</small>
+      }
+    </label>
+
+    <label>
+      Rol
+      <select formControlName="role">
+        @for (role of roles; track role) {
+          <option [value]="role">{{ role }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <a routerLink="/users">Cancelar</a>
+    </div>
+  </form>
+}
