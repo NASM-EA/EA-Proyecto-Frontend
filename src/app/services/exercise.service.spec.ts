@@ -81,6 +81,22 @@ describe('ExerciseService', () => {
     req.flush(null);
   });
 
+  it('softDeleteManyExercises() sends DELETE with the ids in the body', () => {
+    service.softDeleteManyExercises(['e1', 'e2']).subscribe();
+    const req = httpMock.expectOne(url);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.body).toEqual({ ids: ['e1', 'e2'] });
+    req.flush({ deleted: 2 });
+  });
+
+  it('hardDeleteManyExercises() sends DELETE to /hard with the ids in the body', () => {
+    service.hardDeleteManyExercises(['e1', 'e2']).subscribe();
+    const req = httpMock.expectOne(`${url}/hard`);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.body).toEqual({ ids: ['e1', 'e2'] });
+    req.flush({ deleted: 2 });
+  });
+
   it('updateExercise() puts the whole exercise to the id url', () => {
     service.updateExercise('e1', { name: 'Press', category: 'CHEST', sets: 3, reps: 8 }).subscribe();
     const req = httpMock.expectOne(`${url}/e1`);

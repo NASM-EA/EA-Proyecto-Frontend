@@ -51,4 +51,13 @@
       <a routerLink="/workouts">Cancelar</a>
     </div>
   </form>
+
+  <app-confirm-modal
+    [open]="confirmOpen()"
+    [title]="id() ? '¿Guardar los cambios?' : '¿Crear rutina?'"
+    [message]="id() ? 'Se modificarán los datos de la rutina.' : 'Se creará una rutina nueva.'"
+    [confirmText]="id() ? 'Guardar' : 'Crear'"
+    (confirmed)="confirmSave()"
+    (cancelled)="cancelSave()"
+  />
 }

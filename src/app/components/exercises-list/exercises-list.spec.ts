@@ -80,6 +80,37 @@ describe('ExercisesList', () => {
     expect(component.exerciseToDelete()).toBeNull();
   });
 
+  it('deletes the selected rows in one request, soft and hard', () => {
+    const rows = [
+      { _id: 'e1', name: 'Plancha', category: 'CORE' as const, sets: 3, reps: 30 },
+      { _id: 'e2', name: 'Press', category: 'CHEST' as const, sets: 3, reps: 8 },
+    ];
+    component.exercises.set(rows);
+
+    component.toggleAll();
+    expect(component.allSelected()).toBe(true);
+    expect(component.selectedCount()).toBe(2);
+
+    component.askBulkDelete();
+    expect(component.bulkOpen()).toBe(true);
+    component.softDelete();
+    const soft = httpMock.expectOne(base);
+    expect(soft.request.method).toBe('DELETE');
+    expect(soft.request.body).toEqual({ ids: ['e1', 'e2'] });
+    soft.flush({ deleted: 2 });
+    httpMock.expectOne(`${base}?page=1&limit=10&sort=name&order=asc`).flush(emptyPage(1, 0, 0));
+    expect(component.selectedCount()).toBe(0);
+    expect(component.bulkOpen()).toBe(false);
+
+    component.toggleSelect('e1');
+    component.askBulkDelete();
+    component.hardDelete();
+    const hard = httpMock.expectOne(`${base}/hard`);
+    expect(hard.request.body).toEqual({ ids: ['e1'] });
+    hard.flush({ deleted: 1 });
+    httpMock.expectOne(`${base}?page=1&limit=10&sort=name&order=asc`).flush(emptyPage(1, 0, 0));
+  });
+
   it('sorting by the same column twice flips the order', () => {
     component.sortBy('reps');
     httpMock.expectOne(`${base}?page=1&limit=10&sort=reps&order=asc`).flush(emptyPage(1, 0, 0));

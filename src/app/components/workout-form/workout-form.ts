@@ -15,10 +15,11 @@ import {
 import { ExerciseService } from '../../services/exercise.service';
 import { WorkoutService } from '../../services/workout.service';
 import { apiErrorMessage } from '../../utils/api-error';
+import { ConfirmModal } from '../confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-workout-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, ConfirmModal],
   templateUrl: './workout-form.html',
   styles: `
     :host {
@@ -45,6 +46,8 @@ export class WorkoutForm implements OnInit {
   loading = signal(false);
   loadFailed = signal(false);
   saving = signal(false);
+  // Aviso de confirmación que se enseña antes de enviar el formulario
+  confirmOpen = signal(false);
   error = signal('');
 
   form = this.fb.group({
@@ -85,6 +88,17 @@ export class WorkoutForm implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+
+    // No se guarda hasta que el usuario confirma en el aviso
+    this.confirmOpen.set(true);
+  }
+
+  cancelSave(): void {
+    this.confirmOpen.set(false);
+  }
+
+  confirmSave(): void {
+    this.confirmOpen.set(false);
 
     const id = this.id();
     // La API reemplaza la rutina entera al editar. La descripción puede ir vacía
