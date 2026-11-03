@@ -271,3 +271,25 @@ label.checkbox {
   background: #edf7ed;
   color: #1e4620;
 }
+
+/* Cabeceras de tabla que ordenan al pulsarlas (parecen texto, no botones) */
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Etiquetas pequeñas (categoría de un ejercicio, ejercicios de una rutina) */
+.tag {
+  display: inline-block;
+  margin: 0.1rem 0.25rem 0.1rem 0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #eef0f4;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
