@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,6 +12,7 @@ import {
   ExerciseCategory,
   SortOrder,
 } from '../../models';
+import { BulkDeleteResponse } from '../../models/page.model';
 import { ExerciseService } from '../../services/exercise.service';
 import { apiErrorMessage } from '../../utils/api-error';
 import { DeleteModal } from '../delete-modal/delete-modal';
@@ -62,6 +63,7 @@ export class ExercisesList implements OnInit {
             .pipe(
               tap((response) => {
                 this.exercises.set(response.exercises);
+                this.selected.set(new Set());
                 this.total.set(response.pagination.total);
                 this.totalPages.set(Math.max(response.pagination.totalPages, 1));
                 this.page.set(response.pagination.page);
@@ -81,6 +83,49 @@ export class ExercisesList implements OnInit {
   // Elemento que se está borrando (abre el modal con las dos opciones de borrado)
   exerciseToDelete = signal<Exercise | null>(null);
   deleting = signal(false);
+
+  // Selección para el borrado múltiple: ids de las filas marcadas en la página actual
+  selected = signal<Set<string>>(new Set());
+  selectedCount = computed(() => this.selected().size);
+  allSelected = computed(
+    () => this.exercises().length > 0 && this.exercises().every((item) => this.selected().has(item._id)),
+  );
+  // Modal de borrado abierto para las filas seleccionadas (en vez de para una sola)
+  bulkOpen = signal(false);
+  modalName = computed(() =>
+    this.bulkOpen() ? `${this.selectedCount()} ejercicios seleccionados` : (this.exerciseToDelete()?.name ?? ''),
+  );
+  modalCount = computed(() => (this.bulkOpen() ? this.selectedCount() : 1));
+  modalAllowSoft = computed(() => {
+    if (this.bulkOpen()) {
+      // Si todos los marcados ya estaban borrados lógicamente, solo queda el borrado definitivo
+      return this.exercises().some((item) => this.selected().has(item._id) && !item.isDeleted);
+    }
+    return !this.exerciseToDelete()?.isDeleted;
+  });
+
+  toggleSelect(id: string): void {
+    const next = new Set(this.selected());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.selected.set(next);
+  }
+
+  /** Marca o desmarca todas las filas de la página */
+  toggleAll(): void {
+    this.selected.set(
+      this.allSelected() ? new Set() : new Set(this.exercises().map((item) => item._id)),
+    );
+  }
+
+  askBulkDelete(): void {
+    if (this.selectedCount() > 0) {
+      this.bulkOpen.set(true);
+    }
+  }
   readonly hardNote = 'También se quita de las rutinas que lo usaban.';
 
   askDelete(exercise: Exercise): void {
@@ -89,16 +134,50 @@ export class ExercisesList implements OnInit {
 
   cancelDelete(): void {
     this.exerciseToDelete.set(null);
+    this.bulkOpen.set(false);
   }
 
   /** Borrado lógico: DELETE /exercises/:id, la API solo marca isDeleted */
   softDelete(): void {
+    if (this.bulkOpen()) {
+      this.runBulkDelete((ids) => this.exerciseService.softDeleteManyExercises(ids));
+      return;
+    }
     this.runDelete((id) => this.exerciseService.softDeleteExercise(id));
   }
 
   /** Borrado definitivo: DELETE /exercises/:id/hard, se elimina de la base de datos */
   hardDelete(): void {
+    if (this.bulkOpen()) {
+      this.runBulkDelete((ids) => this.exerciseService.hardDeleteManyExercises(ids));
+      return;
+    }
     this.runDelete((id) => this.exerciseService.hardDeleteExercise(id));
+  }
+
+  private runBulkDelete(request: (ids: string[]) => Observable<BulkDeleteResponse>): void {
+    const ids = [...this.selected()];
+    if (ids.length === 0) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.error.set('');
+    request(ids).subscribe({
+      next: () => {
+        // Si se han quitado todas las filas de la página, vuelvo a la anterior
+        const wasAll = ids.length >= this.exercises().length && this.page() > 1;
+        this.bulkOpen.set(false);
+        this.deleting.set(false);
+        this.selected.set(new Set());
+        this.loadPage(wasAll ? this.page() - 1 : this.page());
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(apiErrorMessage(err));
+        this.bulkOpen.set(false);
+        this.deleting.set(false);
+      },
+    });
   }
 
   private runDelete(request: (id: string) => Observable<void>): void {

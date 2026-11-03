@@ -18,6 +18,11 @@
       <option [value]="day">{{ dayLabels[day] }}</option>
     }
   </select>
+  @if (selectedCount() > 0) {
+    <button type="button" class="danger" (click)="askBulkDelete()">
+      Borrar seleccionados ({{ selectedCount() }})
+    </button>
+  }
 </div>
 
 @if (error()) {
@@ -30,6 +35,14 @@
   <table>
     <thead>
       <tr>
+        <th>
+          <input
+            type="checkbox"
+            aria-label="Seleccionar todos"
+            [checked]="allSelected()"
+            (change)="toggleAll()"
+          />
+        </th>
         <th><button type="button" class="link" (click)="sortBy('name')">Nombre {{ arrow('name') }}</button></th>
         <th><button type="button" class="link" (click)="sortBy('description')">Descripción {{ arrow('description') }}</button></th>
         <th><button type="button" class="link" (click)="sortBy('dayOfWeek')">Día {{ arrow('dayOfWeek') }}</button></th>
@@ -40,6 +53,14 @@
     <tbody>
       @for (workout of workouts(); track workout._id) {
         <tr [class.deleted]="workout.isDeleted">
+          <td>
+            <input
+              type="checkbox"
+              [attr.aria-label]="'Seleccionar ' + workout.name"
+              [checked]="selected().has(workout._id)"
+              (change)="toggleSelect(workout._id)"
+            />
+          </td>
           <td>
             {{ workout.name }}
             @if (workout.isDeleted) {
@@ -72,7 +93,7 @@
         </tr>
       } @empty {
         <tr>
-          <td class="empty" colspan="5">
+          <td class="empty" colspan="6">
             @if (search() || dayOfWeek()) {
               No hay rutinas con esos filtros
             } @else {
@@ -87,10 +108,11 @@
   <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
 
   <app-delete-modal
-    [open]="!!workoutToDelete()"
-    [itemName]="workoutToDelete()?.name ?? ''"
+    [open]="!!workoutToDelete() || bulkOpen()"
+    [itemName]="modalName()"
     [hardNote]="hardNote"
-    [allowSoft]="!workoutToDelete()?.isDeleted"
+    [allowSoft]="modalAllowSoft()"
+    [count]="modalCount()"
     [busy]="deleting()"
     (softDelete)="softDelete()"
     (hardDelete)="hardDelete()"

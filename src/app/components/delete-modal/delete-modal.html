@@ -15,7 +15,11 @@
       (click)="$event.stopPropagation()"
       (keydown.escape)="cancelled.emit(); $event.stopPropagation()"
     >
-      <h2 id="delete-modal-title">Borrar "{{ itemName() }}"</h2>
+      @if (count() > 1) {
+        <h2 id="delete-modal-title">Borrar {{ itemName() }}</h2>
+      } @else {
+        <h2 id="delete-modal-title">Borrar "{{ itemName() }}"</h2>
+      }
       <p class="muted">Elige cómo quieres borrarlo:</p>
 
       @if (allowSoft()) {

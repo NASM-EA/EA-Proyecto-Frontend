@@ -57,4 +57,13 @@
       <a routerLink="/users">Cancelar</a>
     </div>
   </form>
+
+  <app-confirm-modal
+    [open]="confirmOpen()"
+    [title]="id() ? '¿Guardar los cambios?' : '¿Crear usuario?'"
+    [message]="id() ? 'Se modificarán los datos del usuario.' : 'Se creará un usuario nuevo.'"
+    [confirmText]="id() ? 'Guardar' : 'Crear'"
+    (confirmed)="confirmSave()"
+    (cancelled)="cancelSave()"
+  />
 }

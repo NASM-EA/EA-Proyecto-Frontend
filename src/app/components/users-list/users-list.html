@@ -12,6 +12,11 @@
     [(ngModel)]="search"
     (ngModelChange)="loadPage(1)"
   />
+  @if (selectedCount() > 0) {
+    <button type="button" class="danger" (click)="askBulkDelete()">
+      Borrar seleccionados ({{ selectedCount() }})
+    </button>
+  }
 </div>
 
 @if (error()) {
@@ -25,6 +30,14 @@
     <thead>
       <tr>
         <th>
+          <input
+            type="checkbox"
+            aria-label="Seleccionar todos"
+            [checked]="allSelected()"
+            (change)="toggleAll()"
+          />
+        </th>
+        <th>
           <button type="button" class="link" (click)="toggleOrder()">
             Nombre {{ order() === 'asc' ? '▲' : '▼' }}
           </button>
@@ -35,6 +48,14 @@
     <tbody>
       @for (user of users(); track user._id) {
         <tr [class.deleted]="user.isDeleted">
+          <td>
+            <input
+              type="checkbox"
+              [attr.aria-label]="'Seleccionar ' + user.name"
+              [checked]="selected().has(user._id)"
+              (change)="toggleSelect(user._id)"
+            />
+          </td>
           <td>
             {{ user.name }}
             @if (user.isDeleted) {
@@ -52,7 +73,7 @@
         </tr>
       } @empty {
         <tr>
-          <td class="empty" colspan="2">
+          <td class="empty" colspan="3">
             @if (search()) {
               No hay resultados para "{{ search() }}"
             } @else {
@@ -67,10 +88,11 @@
   <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
 
   <app-delete-modal
-    [open]="!!userToDelete()"
-    [itemName]="userToDelete()?.name ?? ''"
+    [open]="!!userToDelete() || bulkOpen()"
+    [itemName]="modalName()"
     [hardNote]="hardNote"
-    [allowSoft]="!userToDelete()?.isDeleted"
+    [allowSoft]="modalAllowSoft()"
+    [count]="modalCount()"
     [busy]="deleting()"
     (softDelete)="softDelete()"
     (hardDelete)="hardDelete()"

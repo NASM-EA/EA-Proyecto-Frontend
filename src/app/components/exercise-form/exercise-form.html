@@ -50,4 +50,13 @@
       <a routerLink="/exercises">Cancelar</a>
     </div>
   </form>
+
+  <app-confirm-modal
+    [open]="confirmOpen()"
+    [title]="id() ? '¿Guardar los cambios?' : '¿Crear ejercicio?'"
+    [message]="id() ? 'Se modificarán los datos del ejercicio.' : 'Se creará un ejercicio nuevo.'"
+    [confirmText]="id() ? 'Guardar' : 'Crear'"
+    (confirmed)="confirmSave()"
+    (cancelled)="cancelSave()"
+  />
 }
