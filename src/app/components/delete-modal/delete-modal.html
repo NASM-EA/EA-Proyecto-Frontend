@@ -1,0 +1,53 @@
+@if (open()) {
+  <div
+    class="overlay"
+    role="presentation"
+    tabindex="-1"
+    (click)="cancelled.emit()"
+    (keydown.escape)="cancelled.emit()"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="cancelled.emit(); $event.stopPropagation()"
+    >
+      <h2 id="delete-modal-title">Borrar "{{ itemName() }}"</h2>
+      <p class="muted">Elige cómo quieres borrarlo:</p>
+
+      @if (allowSoft()) {
+        <div class="option">
+          <div>
+            <strong>Borrar</strong>
+            <p>Se oculta de los listados pero sigue en la base de datos (borrado lógico).</p>
+          </div>
+          <button type="button" class="secondary" [disabled]="busy()" (click)="softDelete.emit()">
+            Borrar
+          </button>
+        </div>
+      }
+
+      <div class="option">
+        <div>
+          <strong>Eliminar definitivamente</strong>
+          <p>
+            Se elimina de la base de datos para siempre. No se puede deshacer.
+            {{ hardNote() }}
+          </p>
+        </div>
+        <button type="button" class="danger" [disabled]="busy()" (click)="hardDelete.emit()">
+          Eliminar
+        </button>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="secondary" [disabled]="busy()" (click)="cancelled.emit()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+}

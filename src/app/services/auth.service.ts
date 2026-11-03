@@ -59,9 +59,10 @@ export class AuthService {
     return this.http.post<RegisterResponse>(`${this.baseUrl}/register`, data);
   }
 
-  /** POST /auth/login. Si va bien, guarda los dos tokens y el usuario */
+  /** POST /auth/admin/login. Es el login del backoffice: solo entra un ADMIN (un USER recibe 403).
+   *  Si va bien, guarda los dos tokens y el usuario */
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, credentials).pipe(
+    return this.http.post<LoginResponse>(`${this.baseUrl}/admin/login`, credentials).pipe(
       // tap: hago algo con la respuesta sin cambiarla; el componente la sigue recibiendo igual
       tap((response) => {
         localStorage.setItem(TOKEN_KEY, response.token);

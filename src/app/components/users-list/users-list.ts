@@ -3,11 +3,12 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
 
 import { SortOrder, UserSummary } from '../../models';
 import { UserService } from '../../services/user.service';
 import { apiErrorMessage } from '../../utils/api-error';
+import { DeleteModal } from '../delete-modal/delete-modal';
 import { Pagination } from '../pagination/pagination';
 
 const PAGE_SIZE = 10;
@@ -16,7 +17,7 @@ const PAGE_SIZE = 10;
 // El email y el rol se ven al pulsar Editar (GET /users/:id, solo ADMIN)
 @Component({
   selector: 'app-users-list',
-  imports: [FormsModule, RouterLink, Pagination],
+  imports: [FormsModule, RouterLink, Pagination, DeleteModal],
   templateUrl: './users-list.html',
 })
 export class UsersList implements OnInit {
@@ -58,6 +59,53 @@ export class UsersList implements OnInit {
         takeUntilDestroyed(),
       )
       .subscribe();
+  }
+
+  // Elemento que se está borrando (abre el modal con las dos opciones de borrado)
+  userToDelete = signal<UserSummary | null>(null);
+  deleting = signal(false);
+  readonly hardNote = '';
+
+  askDelete(user: UserSummary): void {
+    this.userToDelete.set(user);
+  }
+
+  cancelDelete(): void {
+    this.userToDelete.set(null);
+  }
+
+  /** Borrado lógico: DELETE /users/:id, la API solo marca isDeleted */
+  softDelete(): void {
+    this.runDelete((id) => this.userService.softDeleteUser(id));
+  }
+
+  /** Borrado definitivo: DELETE /users/:id/hard, se elimina de la base de datos */
+  hardDelete(): void {
+    this.runDelete((id) => this.userService.hardDeleteUser(id));
+  }
+
+  private runDelete(request: (id: string) => Observable<void>): void {
+    const user = this.userToDelete();
+    if (!user) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.error.set('');
+    request(user._id).subscribe({
+      next: () => {
+        // Si era el último de la página, vuelvo a la anterior para no quedarme en una página vacía
+        const wasLast = this.users().length === 1 && this.page() > 1;
+        this.userToDelete.set(null);
+        this.deleting.set(false);
+        this.loadPage(wasLast ? this.page() - 1 : this.page());
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(apiErrorMessage(err));
+        this.userToDelete.set(null);
+        this.deleting.set(false);
+      },
+    });
   }
 
   ngOnInit(): void {

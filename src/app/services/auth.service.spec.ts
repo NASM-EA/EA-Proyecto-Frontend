@@ -54,7 +54,7 @@ describe('AuthService', () => {
 
   it('login() stores both tokens and the user', () => {
     service.login({ email: 'admin@example.com', password: 'seminari7' }).subscribe();
-    httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(loginResponse);
+    httpMock.expectOne(`${environment.apiUrl}/auth/admin/login`).flush(loginResponse);
 
     expect(service.getToken()).toBe('access-1');
     expect(localStorage.getItem('refreshToken')).toBe('refresh-1');
@@ -67,7 +67,7 @@ describe('AuthService', () => {
       .login({ email: 'admin@example.com', password: 'mala12345' })
       .subscribe({ error: () => undefined });
     httpMock
-      .expectOne(`${environment.apiUrl}/auth/login`)
+      .expectOne(`${environment.apiUrl}/auth/admin/login`)
       .flush(
         { message: 'Email o contraseña incorrectos' },
         { status: 401, statusText: 'Unauthorized' },
@@ -101,7 +101,7 @@ describe('AuthService', () => {
   it('logout() clears the session and goes to the login page', () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     service.login({ email: 'admin@example.com', password: 'seminari7' }).subscribe();
-    httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(loginResponse);
+    httpMock.expectOne(`${environment.apiUrl}/auth/admin/login`).flush(loginResponse);
 
     service.logout();
 

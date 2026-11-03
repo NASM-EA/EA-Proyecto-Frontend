@@ -56,7 +56,8 @@ export class WorkoutForm implements OnInit {
 
   ngOnInit(): void {
     this.exerciseService.getExercises({ limit: 100 }).subscribe({
-      next: (response) => this.exercises.set(response.exercises),
+      // Un ADMIN recibe también los ejercicios borrados lógicamente: no se pueden elegir
+      next: (response) => this.exercises.set(response.exercises.filter((exercise) => !exercise.isDeleted)),
       error: (err: HttpErrorResponse) => this.error.set(apiErrorMessage(err)),
     });
 
