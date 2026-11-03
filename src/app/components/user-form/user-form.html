@@ -1,4 +1,4 @@
-<h1>{{ id() ? 'Editar autor' : 'Nuevo autor' }}</h1>
+<h1>{{ id() ? 'Editar usuario' : 'Nuevo usuario' }}</h1>
 
 @if (error()) {
   <p class="alert">{{ error() }}</p>
@@ -7,7 +7,7 @@
 @if (loading()) {
   <p class="muted">Cargando...</p>
 } @else if (loadFailed()) {
-  <a routerLink="/authors">Volver a la lista de autores</a>
+  <a routerLink="/users">Volver a la lista de usuarios</a>
 } @else {
   <form [formGroup]="form" (ngSubmit)="save()">
     <label>
@@ -29,34 +29,32 @@
     </label>
 
     <label>
-      Fecha de nacimiento
-      <input type="date" formControlName="birthDate" />
-    </label>
-
-    <label>
-      Nacionalidad
-      <input type="text" formControlName="nationality" />
-    </label>
-
-    <label>
-      Web
-      <input type="url" formControlName="website" placeholder="https://..." />
-      @if (form.controls.website.touched && form.controls.website.invalid) {
-        <small class="field-error">Tiene que empezar por http:// o https://</small>
+      Contraseña {{ id() ? '' : '*' }}
+      <input type="password" formControlName="password" autocomplete="new-password" />
+      @if (id()) {
+        <small class="hint">Déjala vacía para mantener la actual</small>
+      }
+      @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+        <small class="field-error">La contraseña es obligatoria</small>
+      } @else if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+        <small class="field-error">Tiene que tener al menos 8 caracteres</small>
       }
     </label>
 
-    <label class="checkbox">
-      <input type="checkbox" formControlName="active" />
-      Activo
+    <label>
+      Rol
+      <select formControlName="role">
+        @for (role of roles; track role) {
+          <option [value]="role">{{ role }}</option>
+        }
+      </select>
     </label>
 
     <div class="form-actions">
-      <!-- Property binding: el botón se desactiva si el formulario no es válido o se está guardando -->
       <button type="submit" [disabled]="form.invalid || saving()">
         {{ saving() ? 'Guardando...' : 'Guardar' }}
       </button>
-      <a routerLink="/authors">Cancelar</a>
+      <a routerLink="/users">Cancelar</a>
     </div>
   </form>
 }

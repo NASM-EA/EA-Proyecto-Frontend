@@ -1,6 +1,8 @@
-// Un usuario es quien inicia sesión en la aplicación. No es lo mismo que un autor:
-// los autores son datos del backoffice, como los libros.
-export type UserRole = 'user' | 'admin';
+import type { ListParams, PageInfo } from './page.model';
+
+// Los mismos valores que acepta el modelo User del backend
+export const USER_ROLES = ['ADMIN', 'USER'] as const;
+export type UserRole = (typeof USER_ROLES)[number];
 
 // El usuario tal como lo devuelve la API (nunca trae la contraseña)
 export interface User {
@@ -10,6 +12,27 @@ export interface User {
   role: UserRole;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// GET /users solo devuelve el id y el nombre (está pensado para el chat)
+export interface UserSummary {
+  _id: string;
+  name: string;
+}
+
+export interface UsersPage {
+  users: UserSummary[];
+  pagination: PageInfo;
+}
+
+export type UserListParams = ListParams;
+
+// POST /users y PUT /users/:id. Al editar la contraseña es opcional
+export interface UserInput {
+  name: string;
+  email: string;
+  password?: string;
+  role?: UserRole;
 }
 
 // POST /auth/register

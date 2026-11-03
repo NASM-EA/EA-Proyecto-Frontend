@@ -6,10 +6,11 @@
   @if (auth.isAdmin()) {
     <p>Desde el backoffice puedes gestionar:</p>
     <div class="form-actions">
-      <a class="button" routerLink="/authors">Autores</a>
-      <a class="button" routerLink="/books">Libros</a>
+      <a class="button" routerLink="/exercises">Ejercicios</a>
+      <a class="button" routerLink="/workouts">Rutinas</a>
+      <a class="button" routerLink="/users">Usuarios</a>
     </div>
   } @else {
-    <p>El backoffice de autores y libros es solo para administradores.</p>
+    <p>El backoffice de ejercicios, rutinas y usuarios es solo para administradores.</p>
   }
 }

@@ -14,7 +14,7 @@ describe('AuthService', () => {
   const loginResponse: LoginResponse = {
     token: 'access-1',
     refreshToken: 'refresh-1',
-    user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'admin' },
+    user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'ADMIN' },
   };
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('AuthService', () => {
       email: 'ana@example.com',
       password: 'seminari7',
     });
-    req.flush({ user: { ...loginResponse.user, role: 'user' } });
+    req.flush({ user: { ...loginResponse.user, role: 'USER' } });
 
     expect(service.isLoggedIn()).toBe(false);
   });

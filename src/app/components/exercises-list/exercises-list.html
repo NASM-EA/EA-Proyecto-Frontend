@@ -1,0 +1,68 @@
+<div class="page-header">
+  <h1>Ejercicios</h1>
+  <a class="button" routerLink="/exercises/new">Nuevo ejercicio</a>
+</div>
+
+<div class="toolbar">
+  <input
+    class="search"
+    type="search"
+    placeholder="Buscar por nombre"
+    aria-label="Buscar ejercicios"
+    [(ngModel)]="search"
+    (ngModelChange)="loadPage(1)"
+  />
+  <select aria-label="Filtrar por categoría" [(ngModel)]="category" (ngModelChange)="loadPage(1)">
+    <option value="">Todas las categorías</option>
+    @for (item of categories; track item) {
+      <option [value]="item">{{ categoryLabels[item] }}</option>
+    }
+  </select>
+</div>
+
+@if (error()) {
+  <p class="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Cargando...</p>
+} @else if (!error() || exercises().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th><button type="button" class="link" (click)="sortBy('name')">Nombre {{ arrow('name') }}</button></th>
+        <th><button type="button" class="link" (click)="sortBy('category')">Categoría {{ arrow('category') }}</button></th>
+        <th><button type="button" class="link" (click)="sortBy('sets')">Series {{ arrow('sets') }}</button></th>
+        <th><button type="button" class="link" (click)="sortBy('reps')">Repeticiones {{ arrow('reps') }}</button></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (exercise of exercises(); track exercise._id) {
+        <tr>
+          <td>{{ exercise.name }}</td>
+          <td><span class="tag">{{ categoryLabels[exercise.category] }}</span></td>
+          <td>{{ exercise.sets }}</td>
+          <td>{{ exercise.reps }}</td>
+          <td class="actions">
+            <button type="button" class="secondary" [routerLink]="['/exercises', exercise._id, 'edit']">
+              Editar
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty" colspan="5">
+            @if (search() || category()) {
+              No hay ejercicios con esos filtros
+            } @else {
+              No hay ejercicios
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
+}
