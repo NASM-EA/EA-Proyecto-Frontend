@@ -5,6 +5,7 @@
   --primary-dark: #283593;
   --danger: #c62828;
   --danger-light: #fdecea;
+  --success: #1e7e34;
   --text: #1f2933;
   --muted: #6b7280;
   --border: #d9dde3;
@@ -261,6 +262,25 @@ label.checkbox {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+/* Ventanas modales (confirmar y borrar). Cada una pone su ancho en su .css */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+  width: 90%;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* Aviso de que algo ha ido bien (por ejemplo, cuenta creada) */

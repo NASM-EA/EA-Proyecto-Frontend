@@ -39,7 +39,7 @@
 }
 
 .connection-status.connected {
-  color: #176b36;
+  color: var(--success);
 }
 
 .connection-indicator {
@@ -50,17 +50,17 @@
 }
 
 .connection-status.connected .connection-indicator {
-  background: #218a49;
+  background: var(--success);
 }
 
 .chat-error,
 .room-warning {
   margin: 0;
   padding: 0.7rem 0.9rem;
-  border: 1px solid #e7b8b4;
+  border: 1px solid #f5c2c0;
   border-radius: var(--radius);
   background: var(--danger-light);
-  color: #8f1d16;
+  color: var(--danger);
 }
 
 .chat-tabs {
@@ -149,7 +149,6 @@
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: #f7f8fa;
   overflow-wrap: anywhere;
 }
 
@@ -183,6 +182,7 @@
   border: 0;
   border-top: 1px solid var(--border);
   border-radius: 0;
+  background: none;
 }
 
 .message-form input {
