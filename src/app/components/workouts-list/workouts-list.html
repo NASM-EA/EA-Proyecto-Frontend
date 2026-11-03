@@ -1,0 +1,80 @@
+<div class="page-header">
+  <h1>Rutinas</h1>
+  <a class="button" routerLink="/workouts/new">Nueva rutina</a>
+</div>
+
+<div class="toolbar">
+  <input
+    class="search"
+    type="search"
+    placeholder="Buscar por nombre o descripción"
+    aria-label="Buscar rutinas"
+    [(ngModel)]="search"
+    (ngModelChange)="loadPage(1)"
+  />
+  <select aria-label="Filtrar por día" [(ngModel)]="dayOfWeek" (ngModelChange)="loadPage(1)">
+    <option value="">Todos los días</option>
+    @for (day of days; track day) {
+      <option [value]="day">{{ dayLabels[day] }}</option>
+    }
+  </select>
+</div>
+
+@if (error()) {
+  <p class="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Cargando...</p>
+} @else if (!error() || workouts().length > 0) {
+  <table>
+    <thead>
+      <tr>
+        <th><button type="button" class="link" (click)="sortBy('name')">Nombre {{ arrow('name') }}</button></th>
+        <th><button type="button" class="link" (click)="sortBy('description')">Descripción {{ arrow('description') }}</button></th>
+        <th><button type="button" class="link" (click)="sortBy('dayOfWeek')">Día {{ arrow('dayOfWeek') }}</button></th>
+        <th>Ejercicios</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (workout of workouts(); track workout._id) {
+        <tr>
+          <td>{{ workout.name }}</td>
+          <td [title]="workout.description || ''">
+            @if (workout.description) {
+              {{ workout.description | truncate: 60 }}
+            } @else {
+              <span class="muted">—</span>
+            }
+          </td>
+          <td>{{ dayLabels[workout.dayOfWeek] }}</td>
+          <td>
+            @for (exercise of workout.exercises; track exercise._id) {
+              <span class="tag">{{ exercise.name }}</span>
+            } @empty {
+              <span class="muted">Sin ejercicios</span>
+            }
+          </td>
+          <td class="actions">
+            <button type="button" class="secondary" [routerLink]="['/workouts', workout._id, 'edit']">
+              Editar
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty" colspan="5">
+            @if (search() || dayOfWeek()) {
+              No hay rutinas con esos filtros
+            } @else {
+              No hay rutinas
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="loadPage($event)" />
+}

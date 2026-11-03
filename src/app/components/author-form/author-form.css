@@ -1,5 +1,0 @@
-/* Así el aviso de error mide lo mismo que el formulario */
-:host {
-  display: block;
-  max-width: 560px;
-}

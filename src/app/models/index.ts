@@ -1,13 +1,20 @@
-export type { Author, AuthorsPage, CreateAuthor, UpdateAuthor } from './author.model';
+export type { ListParams, PageInfo, SortOrder } from './page.model';
 export type {
-  Book,
-  BookInput,
-  BookLanguage,
-  BooksPage,
-  CreateBook,
-  UpdateBook,
-} from './book.model';
-export { BOOK_LANGUAGES, BOOK_TAGS } from './book.model';
+  Exercise,
+  ExerciseCategory,
+  ExerciseInput,
+  ExerciseListParams,
+  ExercisesPage,
+} from './exercise.model';
+export { EXERCISE_CATEGORIES, EXERCISE_CATEGORY_LABELS } from './exercise.model';
+export type {
+  DayOfWeek,
+  Workout,
+  WorkoutInput,
+  WorkoutListParams,
+  WorkoutsPage,
+} from './workout.model';
+export { DAYS_OF_WEEK, DAY_LABELS } from './workout.model';
 export type {
   LoginRequest,
   LoginResponse,
@@ -15,5 +22,10 @@ export type {
   RegisterRequest,
   RegisterResponse,
   User,
+  UserInput,
+  UserListParams,
   UserRole,
+  UserSummary,
+  UsersPage,
 } from './user.model';
+export { USER_ROLES } from './user.model';

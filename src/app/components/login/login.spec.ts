@@ -54,7 +54,7 @@ describe('Login', () => {
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush({
       token: 't',
       refreshToken: 'r',
-      user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'admin' },
+      user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'ADMIN' },
     });
 
     expect(navigateByUrl).toHaveBeenCalledWith('/books', { replaceUrl: true });
@@ -67,7 +67,7 @@ describe('Login', () => {
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush({
       token: 't',
       refreshToken: 'r',
-      user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'admin' },
+      user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'ADMIN' },
     });
 
     expect(navigateByUrl).toHaveBeenCalledWith('/', { replaceUrl: true });

@@ -52,7 +52,7 @@ export class AuthService {
 
   // computed: se recalculan solos cada vez que cambia el usuario
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
-  readonly isAdmin = computed(() => this.currentUser()?.role === 'admin');
+  readonly isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
 
   /** POST /auth/register. No inicia sesión: la API no devuelve token y hay que hacer login */
   register(data: RegisterRequest): Observable<RegisterResponse> {

@@ -19,7 +19,7 @@ describe('auth guards', () => {
     );
   }
 
-  function loginAs(role: 'user' | 'admin'): void {
+  function loginAs(role: 'USER' | 'ADMIN'): void {
     localStorage.setItem('user', JSON.stringify({ _id: 'u1', name: 'X', email: 'x@y.z', role }));
   }
 
@@ -37,25 +37,25 @@ describe('auth guards', () => {
   });
 
   it('authGuard lets a user with a session in', () => {
-    loginAs('user');
+    loginAs('USER');
     setup();
     expect(run(authGuard)).toBe(true);
   });
 
   it('adminGuard sends a user back to the home page', () => {
-    loginAs('user');
+    loginAs('USER');
     setup();
     expect(run(adminGuard).toString()).toBe('/');
   });
 
   it('adminGuard lets an admin in', () => {
-    loginAs('admin');
+    loginAs('ADMIN');
     setup();
     expect(run(adminGuard)).toBe(true);
   });
 
   it('guestGuard sends a user with a session to the home page', () => {
-    loginAs('user');
+    loginAs('USER');
     setup();
     expect(run(guestGuard).toString()).toBe('/');
   });

@@ -11,7 +11,7 @@ describe('authInterceptor', () => {
   let httpMock: HttpTestingController;
   let navigate: ReturnType<typeof vi.spyOn>;
 
-  const authorsUrl = `${environment.apiUrl}/authors`;
+  const exercisesUrl = `${environment.apiUrl}/exercises`;
   const refreshUrl = `${environment.apiUrl}/auth/refresh`;
 
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('authInterceptor', () => {
     localStorage.setItem('refreshToken', 'refresh-1');
     localStorage.setItem(
       'user',
-      JSON.stringify({ _id: 'u1', name: 'Admin', email: 'a@b.c', role: 'admin' }),
+      JSON.stringify({ _id: 'u1', name: 'Admin', email: 'a@b.c', role: 'ADMIN' }),
     );
 
     TestBed.configureTestingModule({
@@ -41,9 +41,9 @@ describe('authInterceptor', () => {
   });
 
   it('adds the Authorization header with the stored token', () => {
-    http.get(authorsUrl).subscribe();
+    http.get(exercisesUrl).subscribe();
 
-    const req = httpMock.expectOne(authorsUrl);
+    const req = httpMock.expectOne(exercisesUrl);
     expect(req.request.headers.get('Authorization')).toBe('Bearer access-1');
     req.flush({});
   });
@@ -58,30 +58,30 @@ describe('authInterceptor', () => {
 
   it('renews an expired token and repeats the request with the new one', () => {
     let response: unknown;
-    http.get(authorsUrl).subscribe((res) => (response = res));
+    http.get(exercisesUrl).subscribe((res) => (response = res));
 
     httpMock
-      .expectOne(authorsUrl)
+      .expectOne(exercisesUrl)
       .flush({ message: 'El token ha caducado' }, { status: 401, statusText: 'Unauthorized' });
 
     const refresh = httpMock.expectOne(refreshUrl);
     expect(refresh.request.body).toEqual({ refreshToken: 'refresh-1' });
     refresh.flush({ token: 'access-2' });
 
-    const retry = httpMock.expectOne(authorsUrl);
+    const retry = httpMock.expectOne(exercisesUrl);
     expect(retry.request.headers.get('Authorization')).toBe('Bearer access-2');
-    retry.flush({ authors: [] });
+    retry.flush({ exercises: [] });
 
-    expect(response).toEqual({ authors: [] });
+    expect(response).toEqual({ exercises: [] });
     expect(navigate).not.toHaveBeenCalled();
   });
 
   it('logs out when the token cannot be renewed', () => {
     let failed = false;
-    http.get(authorsUrl).subscribe({ error: () => (failed = true) });
+    http.get(exercisesUrl).subscribe({ error: () => (failed = true) });
 
     httpMock
-      .expectOne(authorsUrl)
+      .expectOne(exercisesUrl)
       .flush({ message: 'El token ha caducado' }, { status: 401, statusText: 'Unauthorized' });
     httpMock
       .expectOne(refreshUrl)
@@ -93,10 +93,10 @@ describe('authInterceptor', () => {
   });
 
   it('logs out on any other 401 without trying to renew', () => {
-    http.get(authorsUrl).subscribe({ error: () => undefined });
+    http.get(exercisesUrl).subscribe({ error: () => undefined });
 
     httpMock
-      .expectOne(authorsUrl)
+      .expectOne(exercisesUrl)
       .flush({ message: 'Token no válido' }, { status: 401, statusText: 'Unauthorized' });
 
     httpMock.expectNone(refreshUrl);
@@ -105,10 +105,10 @@ describe('authInterceptor', () => {
 
   it('lets other errors through without touching the session', () => {
     let status = 0;
-    http.get(authorsUrl).subscribe({ error: (err) => (status = err.status) });
+    http.get(exercisesUrl).subscribe({ error: (err) => (status = err.status) });
 
     httpMock
-      .expectOne(authorsUrl)
+      .expectOne(exercisesUrl)
       .flush({ message: 'Necesitas el rol admin' }, { status: 403, statusText: 'Forbidden' });
 
     expect(status).toBe(403);
