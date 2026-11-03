@@ -60,6 +60,26 @@ describe('ExercisesList', () => {
     expect(component.totalPages()).toBe(1);
   });
 
+  it('soft delete and hard delete send different requests, then reload the list', () => {
+    const exercise = { _id: 'e1', name: 'Plancha', category: 'CORE' as const, sets: 3, reps: 30 };
+
+    component.askDelete(exercise);
+    component.softDelete();
+    const soft = httpMock.expectOne(`${base}/e1`);
+    expect(soft.request.method).toBe('DELETE');
+    soft.flush(null);
+    httpMock.expectOne(`${base}?page=1&limit=10&sort=name&order=asc`).flush(emptyPage(1, 0, 0));
+
+    component.askDelete(exercise);
+    component.hardDelete();
+    const hard = httpMock.expectOne(`${base}/e1/hard`);
+    expect(hard.request.method).toBe('DELETE');
+    hard.flush(null);
+    httpMock.expectOne(`${base}?page=1&limit=10&sort=name&order=asc`).flush(emptyPage(1, 0, 0));
+
+    expect(component.exerciseToDelete()).toBeNull();
+  });
+
   it('sorting by the same column twice flips the order', () => {
     component.sortBy('reps');
     httpMock.expectOne(`${base}?page=1&limit=10&sort=reps&order=asc`).flush(emptyPage(1, 0, 0));

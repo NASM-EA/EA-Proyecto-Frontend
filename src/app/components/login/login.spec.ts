@@ -35,7 +35,7 @@ describe('Login', () => {
     component.form.setValue({ email: 'admin@example.com', password: 'mala12345' });
     component.login();
     httpMock
-      .expectOne(`${environment.apiUrl}/auth/login`)
+      .expectOne(`${environment.apiUrl}/auth/admin/login`)
       .flush(
         { message: 'Email o contraseña incorrectos' },
         { status: 401, statusText: 'Unauthorized' },
@@ -51,7 +51,7 @@ describe('Login', () => {
     fixture.componentRef.setInput('returnUrl', '/books');
     component.form.setValue({ email: 'admin@example.com', password: 'seminari7' });
     component.login();
-    httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush({
+    httpMock.expectOne(`${environment.apiUrl}/auth/admin/login`).flush({
       token: 't',
       refreshToken: 'r',
       user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'ADMIN' },
@@ -64,7 +64,7 @@ describe('Login', () => {
     fixture.componentRef.setInput('returnUrl', 'https://example.com');
     component.form.setValue({ email: 'admin@example.com', password: 'seminari7' });
     component.login();
-    httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush({
+    httpMock.expectOne(`${environment.apiUrl}/auth/admin/login`).flush({
       token: 't',
       refreshToken: 'r',
       user: { _id: 'u1', name: 'Admin', email: 'admin@example.com', role: 'ADMIN' },

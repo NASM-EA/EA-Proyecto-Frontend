@@ -3,19 +3,20 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
 
 import { DAYS_OF_WEEK, DAY_LABELS, DayOfWeek, SortOrder, Workout } from '../../models';
 import { TruncatePipe } from '../../pipes/truncate-pipe';
 import { WorkoutService } from '../../services/workout.service';
 import { apiErrorMessage } from '../../utils/api-error';
+import { DeleteModal } from '../delete-modal/delete-modal';
 import { Pagination } from '../pagination/pagination';
 
 const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-workouts-list',
-  imports: [FormsModule, RouterLink, TruncatePipe, Pagination],
+  imports: [FormsModule, RouterLink, TruncatePipe, Pagination, DeleteModal],
   templateUrl: './workouts-list.html',
 })
 export class WorkoutsList implements OnInit {
@@ -70,6 +71,53 @@ export class WorkoutsList implements OnInit {
         takeUntilDestroyed(),
       )
       .subscribe();
+  }
+
+  // Elemento que se está borrando (abre el modal con las dos opciones de borrado)
+  workoutToDelete = signal<Workout | null>(null);
+  deleting = signal(false);
+  readonly hardNote = 'Sus ejercicios no se borran.';
+
+  askDelete(workout: Workout): void {
+    this.workoutToDelete.set(workout);
+  }
+
+  cancelDelete(): void {
+    this.workoutToDelete.set(null);
+  }
+
+  /** Borrado lógico: DELETE /workouts/:id, la API solo marca isDeleted */
+  softDelete(): void {
+    this.runDelete((id) => this.workoutService.softDeleteWorkout(id));
+  }
+
+  /** Borrado definitivo: DELETE /workouts/:id/hard, se elimina de la base de datos */
+  hardDelete(): void {
+    this.runDelete((id) => this.workoutService.hardDeleteWorkout(id));
+  }
+
+  private runDelete(request: (id: string) => Observable<void>): void {
+    const workout = this.workoutToDelete();
+    if (!workout) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.error.set('');
+    request(workout._id).subscribe({
+      next: () => {
+        // Si era el último de la página, vuelvo a la anterior para no quedarme en una página vacía
+        const wasLast = this.workouts().length === 1 && this.page() > 1;
+        this.workoutToDelete.set(null);
+        this.deleting.set(false);
+        this.loadPage(wasLast ? this.page() - 1 : this.page());
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(apiErrorMessage(err));
+        this.workoutToDelete.set(null);
+        this.deleting.set(false);
+      },
+    });
   }
 
   ngOnInit(): void {

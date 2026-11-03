@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
 
 import {
   EXERCISE_CATEGORIES,
@@ -14,13 +14,14 @@ import {
 } from '../../models';
 import { ExerciseService } from '../../services/exercise.service';
 import { apiErrorMessage } from '../../utils/api-error';
+import { DeleteModal } from '../delete-modal/delete-modal';
 import { Pagination } from '../pagination/pagination';
 
 const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-exercises-list',
-  imports: [FormsModule, RouterLink, Pagination],
+  imports: [FormsModule, RouterLink, Pagination, DeleteModal],
   templateUrl: './exercises-list.html',
 })
 export class ExercisesList implements OnInit {
@@ -75,6 +76,53 @@ export class ExercisesList implements OnInit {
         takeUntilDestroyed(),
       )
       .subscribe();
+  }
+
+  // Elemento que se está borrando (abre el modal con las dos opciones de borrado)
+  exerciseToDelete = signal<Exercise | null>(null);
+  deleting = signal(false);
+  readonly hardNote = 'También se quita de las rutinas que lo usaban.';
+
+  askDelete(exercise: Exercise): void {
+    this.exerciseToDelete.set(exercise);
+  }
+
+  cancelDelete(): void {
+    this.exerciseToDelete.set(null);
+  }
+
+  /** Borrado lógico: DELETE /exercises/:id, la API solo marca isDeleted */
+  softDelete(): void {
+    this.runDelete((id) => this.exerciseService.softDeleteExercise(id));
+  }
+
+  /** Borrado definitivo: DELETE /exercises/:id/hard, se elimina de la base de datos */
+  hardDelete(): void {
+    this.runDelete((id) => this.exerciseService.hardDeleteExercise(id));
+  }
+
+  private runDelete(request: (id: string) => Observable<void>): void {
+    const exercise = this.exerciseToDelete();
+    if (!exercise) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.error.set('');
+    request(exercise._id).subscribe({
+      next: () => {
+        // Si era el último de la página, vuelvo a la anterior para no quedarme en una página vacía
+        const wasLast = this.exercises().length === 1 && this.page() > 1;
+        this.exerciseToDelete.set(null);
+        this.deleting.set(false);
+        this.loadPage(wasLast ? this.page() - 1 : this.page());
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(apiErrorMessage(err));
+        this.exerciseToDelete.set(null);
+        this.deleting.set(false);
+      },
+    });
   }
 
   ngOnInit(): void {
