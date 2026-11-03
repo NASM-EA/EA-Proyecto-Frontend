@@ -33,6 +33,9 @@ export interface Exercise extends ExerciseInput {
   _id: string;
   sets: number;
   reps: number;
+  // Los ADMIN reciben también los borrados lógicamente (isDeleted: true)
+  isDeleted?: boolean;
+  deletedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

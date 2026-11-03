@@ -39,15 +39,22 @@
     </thead>
     <tbody>
       @for (exercise of exercises(); track exercise._id) {
-        <tr>
-          <td>{{ exercise.name }}</td>
+        <tr [class.deleted]="exercise.isDeleted">
+          <td>
+            {{ exercise.name }}
+            @if (exercise.isDeleted) {
+              <span class="tag">Borrado</span>
+            }
+          </td>
           <td><span class="tag">{{ categoryLabels[exercise.category] }}</span></td>
           <td>{{ exercise.sets }}</td>
           <td>{{ exercise.reps }}</td>
           <td class="actions">
-            <button type="button" class="secondary" [routerLink]="['/exercises', exercise._id, 'edit']">
-              Editar
-            </button>
+            @if (!exercise.isDeleted) {
+              <button type="button" class="secondary" [routerLink]="['/exercises', exercise._id, 'edit']">
+                Editar
+              </button>
+            }
             <button type="button" class="danger" (click)="askDelete(exercise)">Borrar</button>
           </td>
         </tr>
@@ -71,6 +78,7 @@
     [open]="!!exerciseToDelete()"
     [itemName]="exerciseToDelete()?.name ?? ''"
     [hardNote]="hardNote"
+    [allowSoft]="!exerciseToDelete()?.isDeleted"
     [busy]="deleting()"
     (softDelete)="softDelete()"
     (hardDelete)="hardDelete()"

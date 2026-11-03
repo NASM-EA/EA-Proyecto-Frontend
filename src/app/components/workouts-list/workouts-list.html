@@ -39,8 +39,13 @@
     </thead>
     <tbody>
       @for (workout of workouts(); track workout._id) {
-        <tr>
-          <td>{{ workout.name }}</td>
+        <tr [class.deleted]="workout.isDeleted">
+          <td>
+            {{ workout.name }}
+            @if (workout.isDeleted) {
+              <span class="tag">Borrado</span>
+            }
+          </td>
           <td [title]="workout.description || ''">
             @if (workout.description) {
               {{ workout.description | truncate: 60 }}
@@ -57,9 +62,11 @@
             }
           </td>
           <td class="actions">
-            <button type="button" class="secondary" [routerLink]="['/workouts', workout._id, 'edit']">
-              Editar
-            </button>
+            @if (!workout.isDeleted) {
+              <button type="button" class="secondary" [routerLink]="['/workouts', workout._id, 'edit']">
+                Editar
+              </button>
+            }
             <button type="button" class="danger" (click)="askDelete(workout)">Borrar</button>
           </td>
         </tr>
@@ -83,6 +90,7 @@
     [open]="!!workoutToDelete()"
     [itemName]="workoutToDelete()?.name ?? ''"
     [hardNote]="hardNote"
+    [allowSoft]="!workoutToDelete()?.isDeleted"
     [busy]="deleting()"
     (softDelete)="softDelete()"
     (hardDelete)="hardDelete()"

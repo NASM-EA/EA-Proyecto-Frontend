@@ -15,6 +15,8 @@ export class DeleteModal {
   itemName = input<string>('');
   // Aviso extra que depende de la entidad (por ejemplo, que un ejercicio sale de sus rutinas)
   hardNote = input<string>('');
+  // Si ya está borrado lógicamente, no se ofrece borrarlo lógicamente otra vez
+  allowSoft = input<boolean>(true);
   // Mientras se envía la petición se desactivan los botones para no borrar dos veces
   busy = input<boolean>(false);
 

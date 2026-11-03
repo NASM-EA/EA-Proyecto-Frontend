@@ -34,12 +34,19 @@
     </thead>
     <tbody>
       @for (user of users(); track user._id) {
-        <tr>
-          <td>{{ user.name }}</td>
+        <tr [class.deleted]="user.isDeleted">
+          <td>
+            {{ user.name }}
+            @if (user.isDeleted) {
+              <span class="tag">Borrado</span>
+            }
+          </td>
           <td class="actions">
-            <button type="button" class="secondary" [routerLink]="['/users', user._id, 'edit']">
-              Editar
-            </button>
+            @if (!user.isDeleted) {
+              <button type="button" class="secondary" [routerLink]="['/users', user._id, 'edit']">
+                Editar
+              </button>
+            }
             <button type="button" class="danger" (click)="askDelete(user)">Borrar</button>
           </td>
         </tr>
@@ -63,6 +70,7 @@
     [open]="!!userToDelete()"
     [itemName]="userToDelete()?.name ?? ''"
     [hardNote]="hardNote"
+    [allowSoft]="!userToDelete()?.isDeleted"
     [busy]="deleting()"
     (softDelete)="softDelete()"
     (hardDelete)="hardDelete()"
