@@ -64,7 +64,7 @@ componente que se ve (ver el [apartado 9](#9-routing)).
 
 ## 2. CLI, hot reload y environments
 
-Los comandos para instalar, arrancar y compilar están en el [README](README.md#scripts). Aquí solo tres
+Los comandos para instalar, arrancar y compilar están en el [README](README.md#ejecutar). Aquí solo tres
 cosas más:
 
 - El CLI de Angular viene en las dependencias del proyecto, así que no hace falta instalarlo global: se

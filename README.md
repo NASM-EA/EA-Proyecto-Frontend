@@ -1,185 +1,164 @@
-# Seminari 7: frontend Angular con JWT y WebSockets
+# EA-Proyecto-Frontend
 
-Backoffice en Angular para gestionar **autores** y **libros**: desde aquí se pueden listar, buscar,
-crear, editar y borrar. Para entrar hay que iniciar sesión, y el backoffice es solo para
-administradores. Es el frontend del Seminario 7 de EA:
+Backoffice en Angular de la API [EA-Proyecto-Backend](https://github.com/NASM-EA/EA-Proyecto-Backend):
+usuarios, ejercicios y rutinas, más un chat en tiempo real. Todo salvo el login y el registro pide
+sesión, y las pantallas de gestión son solo para `ADMIN`.
 
-> Backend/Frontend: JWT, WebSockets. Backend TS + Express. Frontend Angular.
-
-Este repositorio parte del frontend del Seminario 6, que ya cubría consumir una API REST (CRUD),
-formularios reactivos, validación y routing. Sobre esa base, el equipo añade en este seminario:
-
-- Registro y login, con el token JWT guardado, un interceptor que lo envía y guards en las rutas
-- Listados paginados por el servidor
-- Extra: chat en tiempo real con socket.io (general, de grupo y directo)
-
-Consume la API de [EA-Seminari7-JWT-WebSockets-Backend](https://github.com/Dsoledispa/EA-Seminari7-JWT-WebSockets-Backend).
-
-Cómo funciona por dentro (componentes, servicios, signals, routing, formularios...): [GUIA.md](GUIA.md).
-Las tareas y la bitácora del seminario: [LOGS.md](LOGS.md). Cómo trabajamos (ramas, commits, pull
-requests): [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Stack tecnológico
-
-Lo que ya está instalado y funcionando:
-
-| Tecnología | Versión | Para qué se usa |
-|---|---|---|
-| [Angular](https://angular.dev/) | 21.2 | Framework del frontend: componentes, router, formularios y cliente HTTP, todo oficial |
-| [TypeScript](https://www.typescriptlang.org/) | 5.9 | JavaScript con tipos. Angular fija qué versiones admite, por eso no va en la 6.0 como el backend |
-| [RxJS](https://rxjs.dev/) | 7.8 | Observables: lo que devuelve `HttpClient` y a lo que se hace `subscribe` |
-| [Angular CLI](https://angular.dev/tools/cli) | 21.2 | El comando `ng`: servidor de desarrollo, build, tests, lint y generar componentes |
-| [Vitest](https://vitest.dev/) | 4.1 | Ejecuta los tests (`*.spec.ts`). Es el runner por defecto de Angular desde que Karma quedó obsoleto |
-| [jsdom](https://github.com/jsdom/jsdom) | 28.1 | Simula el navegador dentro de Node para que los tests puedan pintar componentes |
-| [ESLint](https://eslint.org/) + [angular-eslint](https://github.com/angular-eslint/angular-eslint) | 10.12 / 21.4 | Linter: analiza el TypeScript y también las plantillas HTML, con reglas propias de Angular y de accesibilidad |
-| [Prettier](https://prettier.io/) | 3.9 | Da formato al código (reglas en `.prettierrc`, con el parser de Angular para los `.html`) |
-
-Lo que se añadirá durante el seminario (todavía **no** está instalado):
-
-| Tecnología | Para qué se usará |
-|---|---|
-| [socket.io-client](https://socket.io/docs/v4/client-api/) | Cliente de WebSockets del chat, encapsulado en un servicio de Angular |
-
-El token JWT no necesita librería: el interceptor y el guard se hacen con lo que ya trae Angular.
-
-## Requisitos previos
-
-- [Node.js](https://nodejs.org/) 24 LTS (mínimo 22.12, que es lo que exige Angular 21). Incluye
-  [npm](https://www.npmjs.com/).
-- El backend del Seminario 7 arrancado, con su MongoDB (ver abajo).
-- [VS Code](https://code.visualstudio.com/) con la extensión *Angular Language Service* (recomendado) y
-  [Angular DevTools](https://angular.dev/tools/devtools) en el navegador.
-
-Angular CLI no hace falta instalarlo aparte: viene con las dependencias del proyecto (`npx ng ...`).
-
-## Cómo arrancarlo
-
-Hacen falta dos terminales: una para la API y otra para Angular.
-
-**1. Backend**
-
-Con MongoDB ya arrancado (o con la URL de Atlas puesta en el `.env`):
+## Instalar las dependencias
 
 ```
-git clone https://github.com/Dsoledispa/EA-Seminari7-JWT-WebSockets-Backend
-cd EA-Seminari7-JWT-WebSockets-Backend
 npm install
-cp .env.example .env
-npm run seed
-npm run dev
 ```
 
-La API queda en http://localhost:1337 y su documentación (Swagger) en http://localhost:1337/api-docs.
-`npm run seed` mete 2 usuarios, 12 autores y 12 libros de ejemplo; con `npm run seed -- --reset` se
-vuelven a poner desde cero. Si tu base de datos es de antes del Seminario 7, ejecuta una de las dos
-cosas: `npm run migrate-authors` o `npm run seed -- --reset` (lo explica el README del backend).
-Si ya tenías un `.env`, copia en él las variables `JWT_...` de `.env.example`.
-
-**2. Frontend (este repo)**
-
-```
-git clone https://github.com/Dsoledispa/EA-Seminari7-JWT-WebSockets-Frontend
-cd EA-Seminari7-JWT-WebSockets-Frontend
-npm install
-npm start
-```
-
-Y se abre http://localhost:4200. La página se recarga sola cada vez que guardas un archivo.
-
-**3. Iniciar sesión** con uno de los usuarios del seed (las contraseñas son públicas a propósito):
-
-| Email | Contraseña | Qué ve |
-|---|---|---|
-| `admin@example.com` | `seminari7` | El backoffice entero: autores y libros |
-| `user@example.com` | `seminari7` | Solo la página de inicio: el backoffice es para administradores |
-
-También se puede crear una cuenta en "Registrarse". Las cuentas nuevas son siempre de rol `user`.
-
-## Configuración: un solo fichero
+Hace falta el backend arrancado con su MongoDB (ver su README: `npm install`, `cp .env.example .env`,
+`npm run seed` y `npm run dev`).
 
 El frontend no usa `.env`: lo que llega al navegador lo puede leer cualquiera, así que aquí no hay
-secretos. Toda la configuración está en **un** fichero, y para cambiar la dirección de la API se toca
-aquí y en ningún sitio más:
+secretos. Toda la configuración está en **un** fichero, y para cambiar la dirección de la API o del chat
+se toca aquí y en ningún sitio más:
 
-```typescript
+```
 // src/environments/environment.ts
 export const environment = {
-  apiUrl: 'http://localhost:1337'
+  apiUrl: 'http://localhost:1337',    // llamadas HTTP
+  socketUrl: 'http://localhost:1337', // conexión del chat
 };
 ```
 
-Cuando llegue el chat, la dirección del servidor de sockets también irá aquí.
+## Ejecutar
 
-## Scripts
+Mientras programas, arranca Angular en modo desarrollo; se recarga solo cada vez que guardas un archivo:
 
-| Comando | Qué hace |
-|---|---|
-| `npm start` | Servidor de desarrollo en http://localhost:4200. Se recarga solo al guardar |
-| `npm test` | Pasa los tests con Vitest y se queda esperando cambios (`npm test -- --watch=false` para pasarlos una vez) |
-| `npm run lint` | Pasa angular-eslint sobre los `.ts` y los `.html` de `src/` |
-| `npm run build` | Compila la versión de producción en `dist/backoffice/browser` |
-| `npx ng generate component components/<nombre>` | Crea un componente nuevo con el CLI del proyecto |
+```
+npm start
+```
+
+Queda en <http://localhost:4200>. Para entrar hace falta una cuenta `ADMIN`: con los datos del seed del
+backend es `admin@example.com` / `seminari7`. "Registrarse" crea cuentas `USER` y **no** inicia sesión,
+y el login del backoffice responde 403 si el usuario no es `ADMIN`.
+
+Para pasar los tests, el linter y compilar la versión de producción:
+
+```
+npm test
+npm run lint
+npm run build
+```
+
+`npm test` pasa los tests con Vitest y se queda esperando cambios (`npm test -- --watch=false` para
+pasarlos una vez). `npm run build` compila en `dist/`, y `npm run watch` recompila al guardar sin
+levantar el servidor de desarrollo.
 
 ## Pantallas
 
-| Ruta | Pantalla | Quién entra |
-|---|---|---|
-| `/login` | Iniciar sesión | Solo sin sesión |
-| `/register` | Crear una cuenta | Solo sin sesión |
-| `/` | Inicio: saludo, rol y accesos al backoffice si es admin | Con sesión |
-| `/authors` | Lista de autores (en tabla o en tarjetas): buscador, paginación, editar y borrar | Admin |
-| `/authors/new` | Nuevo autor | Admin |
-| `/authors/:id/edit` | Editar autor | Admin |
-| `/books` | Lista de libros (en tabla o en tarjetas): buscador, paginación, editar y borrar | Admin |
-| `/books/new` | Nuevo libro | Admin |
-| `/books/:id/edit` | Editar libro | Admin |
+Todo salvo `/login` y `/register` pide sesión, y las pantallas de gestión piden además rol `ADMIN`.
 
-Si se entra en una ruta sin permiso, el guard lleva al login (sin sesión) o al inicio (un `user` que
-intenta entrar en el backoffice).
+| Ruta                  | Pantalla         | Quién puede     | Qué hace                                                                                                                   |
+| --------------------- | ---------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `/login`              | Iniciar sesión   | solo sin sesión | Pide email y contraseña a `POST /auth/admin/login` y guarda los dos tokens y el usuario                                    |
+| `/register`           | Crear cuenta     | solo sin sesión | Da de alta un usuario `USER` (`POST /auth/register`), sin token, y vuelve al login con un aviso                            |
+| `/`                   | Inicio           | con sesión      | Saludo, email y rol; accesos al backoffice si es `ADMIN`                                                                   |
+| `/exercises`          | Ejercicios       | `ADMIN`         | Lista paginada: buscador por nombre, filtro por categoría, orden por columna, casillas para borrar varios, editar y borrar |
+| `/exercises/new`      | Nuevo ejercicio  | `ADMIN`         | `name`, `category`, `sets` y `reps`                                                                                        |
+| `/exercises/:id/edit` | Editar ejercicio | `ADMIN`         | Lo mismo, con los datos cargados                                                                                           |
+| `/workouts`           | Rutinas          | `ADMIN`         | Lista paginada: buscador por nombre o descripción, filtro por día, orden por columna, borrado simple y múltiple            |
+| `/workouts/new`       | Nueva rutina     | `ADMIN`         | `name`, `dayOfWeek`, `description` y `exercises` (multiselección)                                                          |
+| `/workouts/:id/edit`  | Editar rutina    | `ADMIN`         | Lo mismo, con los datos cargados                                                                                           |
+| `/users`              | Usuarios         | `ADMIN`         | Lista paginada de `_id` y `name`: buscador, orden por nombre, borrado simple y múltiple                                    |
+| `/users/new`          | Nuevo usuario    | `ADMIN`         | `name`, `email`, `password` y `role`                                                                                       |
+| `/users/:id/edit`     | Editar usuario   | `ADMIN`         | Lo mismo; la contraseña solo se envía si se escribe                                                                        |
+| `/chat`               | Chat             | con sesión      | Salas general, de grupo y directa, con el historial y la lista de usuarios                                                 |
+| cualquier otra        | —                | —               | Vuelve a `/` (o al login, si no hay sesión)                                                                                |
+
+### Quién ve qué
+
+Los guards y el esconder botones son solo comodidad: desde las herramientas del navegador se puede
+saltar un guard. Quien protege los datos es el backend, que comprueba el token y el rol en cada
+petición: sale 401 si no hay sesión y 403 si el rol no llega.
+
+- **`ADMIN`**: ve todo, también los elementos borrados, que salen marcados y sin botón "Editar".
+- **Cualquier otra sesión**: la API solo le devuelve los elementos activos. Un elemento borrado no
+  aparece en los listados y su detalle responde 404.
+
+### Borrar tiene dos formas
+
+El mismo modal ofrece las dos, y cada una va a una petición distinta de la API:
+
+- **Borrado lógico**: la API marca `isDeleted` y el documento sigue en MongoDB. Con las casillas se
+  borran varios a la vez (la petición `DELETE` lleva los ids en el cuerpo y devuelve cuántos se
+  borraron).
+- **Borrado definitivo**: la API lo saca de la base de datos para siempre. En los ejercicios, además,
+  los quita de las rutinas que los tuvieran.
+
+### Lo que la API espera
+
+- Editar es un `PUT` y la API pide el cuerpo completo. Un campo opcional que se deja vacío no se borra:
+  el formulario no lo envía y la API deja el valor que tenía.
+- Un filtro vacío (`category=`, `search=`) hace que la API responda 422, así que los parámetros vacíos
+  no se envían.
+- Los mensajes de validación (422) vienen en inglés, de Joi, y se enseñan tal cual en la pantalla.
+
+## Sesión y token
+
+Los tokens se guardan en `localStorage` (claves `token`, `refreshToken` y `user`) porque la API los
+devuelve en el JSON del login. Su riesgo es **XSS**: un script en la página puede leerlos. Una cookie
+HttpOnly lo evita, pero obliga a cambiar el backend y a protegerse de **CSRF**.
+
+El access token dura 15 minutos. Cuando la API responde 401 con "El token ha caducado", el interceptor
+pide uno nuevo a `POST /auth/refresh` y repite la petición, sin que el usuario lo note. Si el refresh
+token también venció (a los 7 días), cierra la sesión y lleva al login. Cómo funciona por dentro, en el
+[apartado 13 de la GUIA](GUIA.md#13-autenticación-interceptor-y-guards).
 
 ## Estructura del proyecto
 
 ```
 src/
   main.ts                  Punto de entrada: arranca Angular sobre <app-root> de index.html
+  styles.css               Estilos globales
   environments/
-    environment.ts         La única configuración: la URL de la API
+    environment.ts         La única configuración: la URL de la API y la del chat
   app/
     app.config.ts          Providers de toda la app: router y HttpClient (con el interceptor)
-    app.routes.ts          El mapa de rutas: qué URL pinta qué componente
+    app.routes.ts          El mapa de rutas: qué URL pinta qué componente y con qué guards
     app.ts, app.html       Componente raíz: la barra de navegación y el <router-outlet>
     components/
       navbar/              Menú de arriba: enlaces según el rol, usuario con sesión y cerrar sesión
       login/               Iniciar sesión
       register/            Crear una cuenta
       home/                Página de inicio para cualquier usuario con sesión
-      authors-list/        Lista de autores
-      author-card/         Tarjeta de un autor (componente hijo de la lista)
-      author-form/         Crear y editar autores
-      books-list/          Lista de libros
-      book-form/           Crear y editar libros
-      pagination/          Paginación, componente hijo de las dos listas
-      confirm-modal/       Ventana para confirmar antes de borrar
-      view-toggle/         Botones para ver las listas en tabla o en tarjetas
-    models/                Interfaces TypeScript con la forma de los datos de la API
-      author.model.ts        Author, CreateAuthor, UpdateAuthor
-      book.model.ts          Book, BookInput, CreateBook, UpdateBook, BOOK_LANGUAGES, BOOK_TAGS
-      user.model.ts          User, UserRole y las peticiones y respuestas de /auth
-    services/              Las únicas piezas que hablan con la API (HttpClient)
+      exercises-list/      Lista de ejercicios: buscador, filtro, orden, paginación y borrado múltiple
+      exercise-form/       Crear y editar ejercicios
+      workouts-list/       Lista de rutinas: buscador, filtro por día, orden, paginación y borrado múltiple
+      workout-form/        Crear y editar rutinas
+      users-list/          Lista de usuarios: buscador, orden, paginación y borrado múltiple
+      user-form/           Crear y editar usuarios
+      chat/                Chat en tiempo real: sala general, de grupo y directa
+      pagination/          Paginación, componente hijo de las tres listas
+      delete-modal/        Ventana con las dos formas de borrar: lógica o definitiva
+      confirm-modal/       Ventana para confirmar antes de guardar un formulario
+    models/                Interfaces de TypeScript con la forma de los datos de la API
+      page.model.ts          ListParams, PageInfo, SortOrder y BulkDeleteResponse
+      user.model.ts          User, UserSummary, UserInput y las peticiones y respuestas de /auth
+      exercise.model.ts      Exercise, ExerciseInput, EXERCISE_CATEGORIES y sus etiquetas
+      workout.model.ts       Workout, WorkoutInput, DAYS_OF_WEEK y sus etiquetas
+      index.ts               Reexporta todo: import { ... } from '../../models'
+    services/              Las únicas piezas que hablan con la API
       auth.service.ts        register, login, refresh, logout y el usuario con sesión (signal)
-      author.service.ts      getAuthors, getAuthor, createAuthor, updateAuthor, deleteAuthor
-      book.service.ts        getBooks, getBook, createBook, updateBook, deleteBook
-    pipes/                 Formatean datos en la plantilla
-      language-name-pipe.ts  'es' -> 'Castellano'
-      truncate-pipe.ts       Corta textos largos con "..."
-    interceptors/
-      auth.interceptor.ts  Añade el token a cada petición y lo renueva si ha caducado
+      user.service.ts        getUsers, getUser, create, update, softDelete y hardDelete (suelto y en bloque)
+      exercise.service.ts    Lo mismo para /exercises
+      workout.service.ts     Lo mismo para /workouts
+      chat.service.ts        Conecta socket.io, entra en una sala y manda y recibe mensajes
     guards/
-      auth.guard.ts        authGuard, adminGuard y guestGuard: quién puede entrar en cada ruta
+      auth.guard.ts          authGuard, adminGuard y guestGuard: quién puede entrar en cada ruta
+    interceptors/
+      auth.interceptor.ts    Añade el token a cada petición y lo renueva si ha caducado
+    pipes/
+      truncate-pipe.ts       Corta los textos largos con "..."
     utils/
-      api-error.ts         Pasa un error de HttpClient a un texto para la pantalla
-      remove-empty.ts      Quita los campos vacíos antes de enviar un formulario
-      password-match.ts    Validador: la contraseña y su repetición coinciden
+      api-error.ts           Pasa un error de HttpClient a un texto para la pantalla
+      list-params.ts         Construye ?page=&search=... sin los valores vacíos, que la API rechaza (422)
+      password-match.ts      Validador: la contraseña y su repetición coinciden
+      remove-empty.ts        Quita los campos vacíos antes de enviar un formulario
 ```
 
 Un dato viaja siempre por el mismo camino, igual que en el backend cada capa hace una sola cosa:
@@ -189,53 +168,5 @@ componente -> service (HttpClient) -> API -> respuesta -> subscribe -> signal ->
 ```
 
 Los componentes no saben de URLs ni de HTTP: piden los datos al service y guardan el resultado en una
-signal. Tampoco saben del token: lo añade el interceptor a todas las peticiones.
-
-## Autenticación
-
-Cómo funciona por dentro (interceptor, guards, renovación del token) está en el
-[apartado 13 de la GUIA](GUIA.md#13-autenticación-interceptor-y-guards). En resumen:
-
-1. En el login, la API devuelve `{ token, refreshToken, user }` y `AuthService` lo guarda todo.
-2. `authInterceptor` añade `Authorization: Bearer <token>` a cada petición.
-3. El access token caduca a los 15 minutos. Cuando la API responde 401 con "El token ha caducado", el
-   interceptor pide uno nuevo a `POST /auth/refresh` y repite la petición, sin que el usuario lo note.
-   Si el refresh token también ha caducado (a los 7 días), cierra la sesión y lleva al login.
-4. Los guards deciden qué pantallas se pueden abrir según haya sesión y según el rol.
-
-### Dónde se guardan los tokens: localStorage o cookie HttpOnly
-
-Los guardamos en **localStorage** (con las claves `token`, `refreshToken` y `user`). Las dos opciones
-que se suelen comparar:
-
-| | localStorage | Cookie HttpOnly |
-|---|---|---|
-| Quién la guarda | El frontend, con JavaScript | El backend, con la cabecera `Set-Cookie` |
-| Se puede leer desde JavaScript | Sí | No |
-| Riesgo principal | **XSS**: si alguien consigue ejecutar un script en la página, puede leer el token y usarlo desde otro sitio | **CSRF**: el navegador envía la cookie solo, también en peticiones que provoca otra web; hay que protegerse (`SameSite`, token anti-CSRF) |
-| Qué pide | Nada especial: encaja con una API que devuelve el token en el JSON | Cambiar el backend (enviar y leer cookies) y configurar CORS con `credentials` |
-
-Elegimos localStorage porque es lo que encaja con el contrato de la API (el token llega en el JSON del
-login) y se entiende sin piezas extra. El riesgo de XSS se reduce porque Angular escapa todo lo que se
-pinta en las plantillas (`{{ }}` nunca ejecuta HTML), y porque el access token dura poco. En una
-aplicación real con datos sensibles, la cookie HttpOnly es la opción más segura.
-
-Los guards y el ocultar botones son solo comodidad: quien protege los datos es el backend, que
-comprueba el token y el rol en cada petición. Desde las herramientas del navegador se puede saltar un
-guard, pero la API seguiría respondiendo 401 o 403.
-
-## Cosas de la API que hay que saber
-
-- Editar es un PUT y la API pide siempre los campos obligatorios (en los autores, el nombre y el
-  email). Un autor no tiene contraseña ni rol: quien inicia sesión es un usuario.
-- Un campo opcional que se deja vacío al editar no se borra. La API rechaza los valores vacíos, así
-  que el formulario no los envía y la API deja el valor que tenía. Los tags sí se pueden vaciar: si se
-  desmarcan todos se envía una lista vacía.
-- Borrar es un borrado lógico: la API marca el autor o el libro como borrado y deja de devolverlo, pero
-  sigue en la base de datos. Por eso un autor borrado **sigue apareciendo dentro de sus libros**.
-- Los mensajes de error de validación que devuelve la API (422) vienen en inglés, de Joi.
-
-## Cómo contribuir
-
-Ramas, commits y pull requests en [CONTRIBUTING.md](CONTRIBUTING.md). Tareas pendientes y bitácora en
-[LOGS.md](LOGS.md).
+signal. Tampoco saben del token ni de la sesión: el token lo pone el interceptor y la sesión vive en
+`AuthService`.

@@ -19,8 +19,9 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
-.obsidian
-*.canvas
+.alt
+AGEN*
+KANVAS*
 
 # Visual Studio Code
 .vscode/*
