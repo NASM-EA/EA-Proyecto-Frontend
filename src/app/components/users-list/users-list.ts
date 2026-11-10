@@ -187,6 +187,15 @@ export class UsersList implements OnInit {
     });
   }
 
+  /** Recuperar: PATCH /users/:id/restore, isDeleted vuelve a false */
+  restore(user: UserSummary): void {
+    this.error.set('');
+    this.userService.restoreUser(user._id).subscribe({
+      next: () => this.loadPage(this.page()),
+      error: (err: HttpErrorResponse) => this.error.set(apiErrorMessage(err)),
+    });
+  }
+
   ngOnInit(): void {
     this.loadPage(1);
   }

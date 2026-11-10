@@ -1,5 +1,5 @@
 {
-  "name": "ea-seminari7-jwt-websockets-frontend",
+  "name": "ea-proyecto-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -19,7 +19,6 @@
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
     "rxjs": "~7.8.0",
-    "socket.io-client": "^4.8.4",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

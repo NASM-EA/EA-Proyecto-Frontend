@@ -76,6 +76,9 @@
                 Editar
               </button>
             }
+            @if (exercise.isDeleted) {
+              <button type="button" class="secondary" (click)="restore(exercise)">Recuperar</button>
+            }
             <button type="button" class="danger" (click)="askDelete(exercise)">Borrar</button>
           </td>
         </tr>

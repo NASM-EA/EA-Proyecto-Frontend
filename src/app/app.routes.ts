@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 
-import { Chat } from './components/chat/chat';
 import { ExerciseForm } from './components/exercise-form/exercise-form';
 import { ExercisesList } from './components/exercises-list/exercises-list';
 import { Home } from './components/home/home';
@@ -44,8 +43,6 @@ export const routes: Routes = [
   { path: 'users', component: UsersList, canActivate: admin, title: 'Usuarios' },
   { path: 'users/new', component: UserForm, canActivate: admin, title: 'Nuevo usuario' },
   { path: 'users/:id/edit', component: UserForm, canActivate: admin, title: 'Editar usuario' },
-
-  { path: 'chat', component: Chat, canActivate: [authGuard], title: 'Chat' },
 
   // Cualquier otra URL vuelve a la página de inicio (o al login, si no hay sesión)
   { path: '**', redirectTo: '' },

@@ -41,6 +41,11 @@ export class WorkoutService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  /** PATCH /workouts/:id/restore. Recupera uno borrado lógicamente: isDeleted vuelve a false (solo ADMIN) */
+  restoreWorkout(id: string): Observable<WorkoutResponse> {
+    return this.http.patch<WorkoutResponse>(`${this.baseUrl}/${id}/restore`, {});
+  }
+
   /** DELETE /workouts/:id/hard. Borrado definitivo de la base de datos (solo ADMIN) */
   hardDeleteWorkout(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/hard`);

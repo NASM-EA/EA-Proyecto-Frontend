@@ -199,6 +199,15 @@ export class WorkoutsList implements OnInit {
     });
   }
 
+  /** Recuperar: PATCH /workouts/:id/restore, isDeleted vuelve a false */
+  restore(workout: Workout): void {
+    this.error.set('');
+    this.workoutService.restoreWorkout(workout._id).subscribe({
+      next: () => this.loadPage(this.page()),
+      error: (err: HttpErrorResponse) => this.error.set(apiErrorMessage(err)),
+    });
+  }
+
   ngOnInit(): void {
     this.loadPage(1);
   }

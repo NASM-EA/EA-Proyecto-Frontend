@@ -68,6 +68,9 @@
                 Editar
               </button>
             }
+            @if (user.isDeleted) {
+              <button type="button" class="secondary" (click)="restore(user)">Recuperar</button>
+            }
             <button type="button" class="danger" (click)="askDelete(user)">Borrar</button>
           </td>
         </tr>
