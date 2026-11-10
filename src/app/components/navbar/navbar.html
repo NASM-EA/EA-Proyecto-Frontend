@@ -12,12 +12,6 @@
     </nav>
   }
 
-  @if (auth.isLoggedIn()) {
-    <nav>
-      <a routerLink="/chat" routerLinkActive="active">Chat</a>
-    </nav>
-  }
-
   <div class="session">
     @if (auth.user(); as user) {
       <span class="user">{{ user.name }} ({{ user.role }})</span>

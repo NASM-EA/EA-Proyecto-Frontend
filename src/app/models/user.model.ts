@@ -15,7 +15,7 @@ export interface User {
   updatedAt?: string;
 }
 
-// GET /users solo devuelve el id y el nombre (está pensado para el chat)
+// GET /users solo devuelve el id y el nombre
 export interface UserSummary {
   _id: string;
   name: string;

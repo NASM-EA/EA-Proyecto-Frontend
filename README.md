@@ -1,7 +1,7 @@
 # EA-Proyecto-Frontend
 
 Backoffice en Angular de la API [EA-Proyecto-Backend](https://github.com/NASM-EA/EA-Proyecto-Backend):
-usuarios, ejercicios y rutinas, más un chat en tiempo real. Todo salvo el login y el registro pide
+usuarios, ejercicios y rutinas. Todo salvo el login y el registro pide
 sesión, y las pantallas de gestión son solo para `ADMIN`.
 
 ## Instalar las dependencias
@@ -14,14 +14,13 @@ Hace falta el backend arrancado con su MongoDB (ver su README: `npm install`, `c
 `npm run seed` y `npm run dev`).
 
 El frontend no usa `.env`: lo que llega al navegador lo puede leer cualquiera, así que aquí no hay
-secretos. Toda la configuración está en **un** fichero, y para cambiar la dirección de la API o del chat
+secretos. Toda la configuración está en **un** fichero, y para cambiar la dirección de la API
 se toca aquí y en ningún sitio más:
 
 ```
 // src/environments/environment.ts
 export const environment = {
-  apiUrl: 'http://localhost:1337',    // llamadas HTTP
-  socketUrl: 'http://localhost:1337', // conexión del chat
+  apiUrl: 'http://localhost:1337', // llamadas HTTP
 };
 ```
 
@@ -67,7 +66,6 @@ Todo salvo `/login` y `/register` pide sesión, y las pantallas de gestión pide
 | `/users`              | Usuarios         | `ADMIN`         | Lista paginada de `_id` y `name`: buscador, orden por nombre, borrado simple y múltiple                                    |
 | `/users/new`          | Nuevo usuario    | `ADMIN`         | `name`, `email`, `password` y `role`                                                                                       |
 | `/users/:id/edit`     | Editar usuario   | `ADMIN`         | Lo mismo; la contraseña solo se envía si se escribe                                                                        |
-| `/chat`               | Chat             | con sesión      | Salas general, de grupo y directa, con el historial y la lista de usuarios                                                 |
 | cualquier otra        | —                | —               | Vuelve a `/` (o al login, si no hay sesión)                                                                                |
 
 ### Quién ve qué
@@ -87,6 +85,8 @@ El mismo modal ofrece las dos, y cada una va a una petición distinta de la API:
 - **Borrado lógico**: la API marca `isDeleted` y el documento sigue en MongoDB. Con las casillas se
   borran varios a la vez (la petición `DELETE` lleva los ids en el cuerpo y devuelve cuántos se
   borraron).
+- **Recuperar**: un elemento borrado lógicamente muestra el botón "Recuperar", que llama a `PATCH /:id/restore` y
+  pone `isDeleted` otra vez a `false`.
 - **Borrado definitivo**: la API lo saca de la base de datos para siempre. En los ejercicios, además,
   los quita de las rutinas que los tuvieran.
 
@@ -116,7 +116,7 @@ src/
   main.ts                  Punto de entrada: arranca Angular sobre <app-root> de index.html
   styles.css               Estilos globales
   environments/
-    environment.ts         La única configuración: la URL de la API y la del chat
+    environment.ts         La única configuración: la URL de la API
   app/
     app.config.ts          Providers de toda la app: router y HttpClient (con el interceptor)
     app.routes.ts          El mapa de rutas: qué URL pinta qué componente y con qué guards
@@ -132,7 +132,6 @@ src/
       workout-form/        Crear y editar rutinas
       users-list/          Lista de usuarios: buscador, orden, paginación y borrado múltiple
       user-form/           Crear y editar usuarios
-      chat/                Chat en tiempo real: sala general, de grupo y directa
       pagination/          Paginación, componente hijo de las tres listas
       delete-modal/        Ventana con las dos formas de borrar: lógica o definitiva
       confirm-modal/       Ventana para confirmar antes de guardar un formulario
@@ -147,7 +146,6 @@ src/
       user.service.ts        getUsers, getUser, create, update, softDelete y hardDelete (suelto y en bloque)
       exercise.service.ts    Lo mismo para /exercises
       workout.service.ts     Lo mismo para /workouts
-      chat.service.ts        Conecta socket.io, entra en una sala y manda y recibe mensajes
     guards/
       auth.guard.ts          authGuard, adminGuard y guestGuard: quién puede entrar en cada ruta
     interceptors/

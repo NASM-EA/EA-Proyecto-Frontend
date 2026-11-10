@@ -41,6 +41,11 @@ export class UserService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  /** PATCH /users/:id/restore. Recupera uno borrado lógicamente: isDeleted vuelve a false (solo ADMIN) */
+  restoreUser(id: string): Observable<UserResponse> {
+    return this.http.patch<UserResponse>(`${this.baseUrl}/${id}/restore`, {});
+  }
+
   /** DELETE /users/:id/hard (solo ADMIN). Borrado definitivo de la base de datos */
   hardDeleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/hard`);

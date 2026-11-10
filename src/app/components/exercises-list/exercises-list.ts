@@ -204,6 +204,15 @@ export class ExercisesList implements OnInit {
     });
   }
 
+  /** Recuperar: PATCH /exercises/:id/restore, isDeleted vuelve a false */
+  restore(exercise: Exercise): void {
+    this.error.set('');
+    this.exerciseService.restoreExercise(exercise._id).subscribe({
+      next: () => this.loadPage(this.page()),
+      error: (err: HttpErrorResponse) => this.error.set(apiErrorMessage(err)),
+    });
+  }
+
   ngOnInit(): void {
     this.loadPage(1);
   }
